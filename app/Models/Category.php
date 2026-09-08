@@ -19,6 +19,10 @@ class Category extends Model
     public function getCreatedBy(){
         return $this->belongsTo(User::class, "created_by", "user_id");
     }
+    
+    public function getUpdatedBy(){
+        return $this->belongsTo(User::class, "updated_by", "user_id");
+    }
 
     public function products(){
         return $this->hasMany(Product::class, "category_id", "category_id");
@@ -28,7 +32,4 @@ class Category extends Model
         $this->attributes["category_name"] = ucwords($value);
     }
 
-    public function getUpdatedBy(){
-        return $this->belongsTo(User::class, "updated_by", "user_id");
-    }
 }

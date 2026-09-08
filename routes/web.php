@@ -19,7 +19,10 @@ Route::prefix("site-administrator")->group(function(){
         Route::prefix("product")->group(function(){
             Route::get("/products-list", [AdminController::class, "product_lists"])->name("admin.show_product_lists");
             Route::get("/product/create", [AdminController::class, 'create_product'])->name('admin.create_product');
+            Route::get("/{id}/edit", [AdminController::class, "edit_product"])->name("admin.edit_product_detail");
+            Route::get("/export-products", [AdminController::class, 'export_all_products'])->name("admin.export_all_products");
 
+            Route::post("/{id}/update", [AdminController::class, 'edit_product'])->name("admin.update_product_detail");
             Route::post("/product/store", [AdminController::class, 'create_product'])->name('admin.submit_create_product');
         });
     

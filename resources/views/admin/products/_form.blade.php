@@ -1,4 +1,11 @@
-{{ html()->form('POST')->action($action)->acceptsFiles()->id("frmProduct")->open() }}
+{{ html()->form('POST')->action($action)->acceptsFiles()->id('frmProduct')->open() }}
+
+<div id="error-container"
+    style="display: none; color: red; background: #f8d7da; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+</div>
+
+{{ html()->hidden("form_action_route")->value($action) }}
+
 {{ html()->div()->class('row')->addChild(
         html()->div()->class('col-sm-8')->addChild(
                 html()->div()->class('form-group')->addChild([
@@ -30,7 +37,7 @@
         html()->div()->class('col-sm-2')->addChild([
                 html()->div()->class('form-group')->addChild([
                         html()->label('Stock Quantity: '),
-                        html()->number('stock_quantity')->addClass(TEXTBOX_CLASS)->value($productData?->stock_quantity),
+                        html()->number('stock_quantity')->addClass(TEXTBOX_CLASS)->value($productData?->quantity),
                     ]),
             ]),
         html()->div()->class('col-sm-3')->addChild(
@@ -54,13 +61,22 @@
         html()->div()->class('col-sm-6')->addChild(
                 html()->div()->class('form-group')->addChild([
                         html()->label('Product Image: '),
-                        html()->file('product_image')->class(TEXTBOX_CLASS)->acceptImage(),
+                        html()->file('product_image')->name('product_image')->class(TEXTBOX_CLASS)->acceptImage(),
                     ]),
             ),
         html()->div()->class('col-sm-6')->addChild(
                 html()->div()->class('form-group')->addChild([
                         html()->label('Tags (seperated by comma): '),
-                        html()->text('product_tags')->class(TEXTBOX_CLASS)->value(implode(',', [$productData?->productTags])),
+                        html()->text('product_tags')->class(TEXTBOX_CLASS)->value(
+                                $productData
+                                    ? implode(
+                                        ', ',
+                                        $productData->tags->flatMap(function ($pivot) {
+                                                return $pivot->getTags->pluck('tag_name');
+                                            })->toArray(),
+                                    )
+                                    : '',
+                            ),
                     ]),
             ),
     ]) }}
@@ -68,13 +84,13 @@
 {{ html()->div()->class('row mt-3')->addChild(
         html()->div()->class('col-sm-12')->addChildren([
                 html()->label('Product Description: '),
-                html()->textarea('product_description')->class(TEXTBOX_CLASS)->rows(4)->style('resize: none;')->value($productData?->product_description),
+                html()->textarea('product_description')->class(TEXTBOX_CLASS)->rows(4)->style('resize: none;')->value($productData?->description),
             ]),
     ) }}
 {{ html()->div()->class('row mt-3')->addChild(
         html()->div()->class('col-sm-3')->addChild([
-                html()->submit('Submit')->class('btn btn-success m-2')->id("btnSubmit"),
-                html()->reset('Cancel')->class('btn btn-secondary'),
+                html()->submit($formType == 'create' ? 'Submit' : 'Update')->class("btn btn-success m-2")->id('btnSubmit'),
+                html()->reset('Reset')->class('btn btn-secondary'),
             ]),
     ) }}
 {{ html()->form()->close() }}

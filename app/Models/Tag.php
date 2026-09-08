@@ -12,4 +12,8 @@ class Tag extends Model
     protected $fillable = [
         "tag_name"
     ];
+
+    public function setTagNameAttribute($val){
+        $this->attributes["tag_name"] = trim($val);
+    }
 }

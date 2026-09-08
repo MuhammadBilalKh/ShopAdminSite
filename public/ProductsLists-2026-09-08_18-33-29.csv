@@ -1,0 +1,3 @@
+S.No,"Product ID","Product Name",Category,Price,"On Sale Price (if any)","Stock Quantity","Stock Status","New Product","Featured Product",Description,"Created By","Updated By","Registered At","Updated At"
+1,dell-laptops-39ae5ad1-bec1-4c70-b659-8704aa2763b3,"Dell Laptops",Electronics,110.00,65.00,89,In-Stock,No,Yes,"this is the testing description of the product. Updated Description","ShopZone Admin (shopzone.admin - admin)",,"2026-09-08 17:11:38","2026-09-08 18:08:26"
+2,chatpata-macaroni-6f0e8edb-653a-43fc-8567-367c3c912c87,"Chatpata Macaroni","Food & Beverages",90.00,70.00,200,In-Stock,Yes,No,"This is the description of the product.","ShopZone Admin (shopzone.admin - admin)",,"2026-09-08 18:09:21","2026-09-08 18:09:21"

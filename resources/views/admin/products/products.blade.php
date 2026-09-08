@@ -47,10 +47,10 @@
 @push('additional_section')
     <div class="admin-table-card mt-3">
         <div class="table-header">
-            <h6>All Products</h6>
+            <h6 id="modalHeader">All Products</h6>
             <div class="row">
                 <div class="col-sm-12">
-                    {{ html()->a('')->class('btn-info-custom btn-sm')->id('btnExportProducts')->text('Export To CSV') }}
+                    {{ html()->a(route('admin.export_all_products'))->class('btn-info-custom btn-sm')->id('btnExportProducts')->text('Export To CSV')->style('padding:.45rem 1rem; border-radius: 8px') }}
                     {{ html()->button('Add Product')->class('btn-primary-custom btn-sm')->id('btnAddProduct')->style('padding:.45rem 1rem; border-radius: 8px')->attributes(['data-bs-toggle' => 'modal', 'data-bs-target' => '#productModal'])->id('btnAddProduct') }}
                 </div>
             </div>
@@ -121,7 +121,7 @@
                     data: function(req) {
                         req.product_name = $("#txtProductName").val();
                         req.category = $("#slctCategory").val();
-                        req.price = $("#txtPrice").val();
+                        req.price = $("#txtProductPrice").val();
                         req.quantity = $("#txtQuantity").val();
                         req.stock_status = $("#slctStockStatus").val();
                     }
@@ -135,8 +135,12 @@
                         name: "product_name"
                     },
                     {
-                        data: "category",
-                        name: "category"
+                        data: null,
+                        name: null,
+                        render: function(val) {
+                            return "<span class='tag-chip'>" + val.get_product_category
+                                .category_name + "</span>";
+                        }
                     },
                     {
                         data: "regular_price",
@@ -151,7 +155,7 @@
                     {
                         data: "stock_status",
                         name: "stock_status",
-                        width: 150
+                        width: 150,
                     },
                     {
                         data: "actions",
@@ -162,40 +166,90 @@
 
             $("label[for^='dt-length-']").addClass("mx-2");
 
+            $(document).on("change", "select", function() {
+                tblProducts.ajax.reload();
+            });
+
+            $(document).on("keydown", "input", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    tblProducts.ajax.reload();
+                }
+            });
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                }
+            });
+
             $(document).on("click", "#btnSubmit", function(e) {
 
+                e.preventDefault();
+
+                const form = document.getElementById("frmProduct");
+                console.log(form)
+                const formData = new FormData(form);
+                const actionUrl = formData.get('form_action_route');
+
                 $.ajax({
-                    url: "{{ route('admin.submit_create_product') }}",
+                    url: actionUrl,
                     type: "POST",
-                    data: $("#frmProduct").serialize(),
+                    contentType: false,
+                    processData: false,
+                    data: formData,
                     beforeSend: function() {
-                        $(this).attr("disabled", "disabled");
-                        $(this).text("Submitting..");
+                        $("#btnSubmit").attr("disabled", "disabled");
+                        $("#btnSubmit").text("Submitting..");
                     },
                     success: function(resp) {
                         if (resp.status == 1) {
                             $(".modal-body").html(
-                                "<h3 class='text-center text-success'>Product Have Been Created Successfully</h3>"
-                                );
+                                "<h5 class='text-center text-success'>" + resp.message +
+                                "</h5>"
+                            );
+
+                            setTimeout(() => {
+                                $(".btn-close").trigger("click");
+                                tblProducts.ajax.reload();
+                            }, 1500);
+
                         } else {
-                            $(this).removeAttr("disabled");
-                            $(this).text("Submit");
+                            $("#btnSubmit").removeAttr("disabled");
+                            $("#btnSubmit").text("Submit");
                             $(".modal-body").html(
                                 "<h3 class='text-center text-danger'>An Error Occured While Processing Your Request. Please Try Again Later</h3>"
-                                );
+                            );
                         }
                     },
-                    error: function(err, ar) {
+                    error: function(err) {
+                        if (err.status === 422) {
+                            let errors = err.responseJSON.errors;
+                            let errorHtml =
+                                '<div class="p-2" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">';
+
+                            $.each(errors, function(key, value) {
+                                errorHtml +=
+                                    '<div class="error-item" style="color: red;">• ' +
+                                    value[0] + '</div>';
+                            });
+
+                            errorHtml += '</div>';
+
+                            $('#error-container').html(errorHtml).fadeIn();
+                            return false;
+                        }
                         $(this).removeAttr("disabled");
                         $(this).text("Submit");
                         $(".modal-body").html(
                             "<h3 class='text-center text-danger'>An Error Occured While Processing Your Request. Please Try Again Later</h3>"
-                            );
+                        );
                     }
                 });
             });
 
             $("#btnAddProduct").on("click", function() {
+                $("#productModalTitle").text("Add New Product");
                 $.ajax({
                     url: "{{ route('admin.create_product') }}",
                     type: "GET",
@@ -204,11 +258,33 @@
                             "<h3 class='text-center'><i class='ri-loader-2-line'></i></h3>");
                     },
                     success: function(resp) {
-                        $(".modal-body").delay(5000)
+                        $(".modal-body").delay(5000);
                         $(".modal-body").html(resp);
                     }
-                })
+                });
             });
+
+            $(document).on("click", ".edit", function() {
+                let prodID = $(this).attr("id");
+                $("#productModalTitle").text("Edit Product Detail");
+
+                let baseRoute = "{{ route('admin.edit_product_detail', ['id' => 'PLACEHOLDER_ID']) }}";
+                let editProductURL = baseRoute.replace('PLACEHOLDER_ID', prodID);
+
+                $.ajax({
+                    url: editProductURL,
+                    type: "GET",
+                    beforeSend: function() {
+                        $(".modal-body").html(
+                            "<h3 class='text-center'><i class='ri-loader-2-line'></i></h3>");
+                    },
+                    success: function(resp) {
+                        $(".modal-body").delay(5000);
+                        $(".modal-body").html(resp);
+                    }
+                });
+            });
+
         });
     </script>
 @endpush
