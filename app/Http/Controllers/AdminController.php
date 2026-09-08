@@ -498,6 +498,11 @@ class AdminController extends Controller
         exit(0);
     }
 
+    public function view_recent_activities(){
+        $recentActivities = RecentActivity::orderByDesc("created_at")->simplePaginate(10);
+        return view('admin.recent_activities', compact('recentActivities'));
+    }
+
     public function logout(){
         Auth::logout();
         return redirect()->route("admin.sign-in")->with('success', "User Logged Out");

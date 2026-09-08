@@ -103,7 +103,8 @@
                 <div class="col-lg-5">
                     <div class="chart-card">
                         <div class="chart-title">
-                            <h6>Recent Activities</h6>
+                            <h6 class="d-inline">Recent Activities</h6>
+                            {{ html()->a(route('admin.view_recent_activities'))->class('float-end text-white btn btn-sm btn-info')->text('View All Activities')->target('_blank') }}
                         </div>
 
                         <div id="activityFeed">

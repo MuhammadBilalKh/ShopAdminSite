@@ -15,6 +15,7 @@ Route::prefix("site-administrator")->group(function(){
 
     Route::middleware([AuthUser::class])->group(function(){
         Route::get("/", [AdminController::class, 'show_admin_dashboard'])->name("admin.show_admin_dashboard");
+        Route::get("/recent-activities", [AdminController::class, 'view_recent_activities'])->name("admin.view_recent_activities");
         
         Route::prefix("product")->group(function(){
             Route::get("/products-list", [AdminController::class, "product_lists"])->name("admin.show_product_lists");
