@@ -636,6 +636,14 @@ class AdminController extends Controller
 
             $majorAreaQuery = MajorArea::with("getMajorAreaCity", "getCreatedBy")->newQuery();
 
+            if($request->filled('major_area_name')){
+                $majorAreaQuery->where('major_area_name', "LIKE", "%".$request->major_area_name."%");
+            }
+
+            if($request->filled('city_name')){
+                $majorAreaQuery->where(['city_id'=> $request->city_name]);
+            }
+
             $majorAreaQuery->orderbyDesc("created_at");
             return $dt->eloquent($majorAreaQuery)
                     ->addIndexColumn()
@@ -676,7 +684,8 @@ class AdminController extends Controller
         if($request->filled('view_form') && $request->view_form == 1){
             return view('admin.city.major_area._form', [
                 'cities' => City::pluck("city_name", "city_id")->toArray(),
-                'action' => route('admin.submit_major_area')
+                'action' => route('admin.submit_major_area'),
+                'majorAreaData' => null
             ])->render();
         }
     }
@@ -714,6 +723,41 @@ class AdminController extends Controller
         ])->render();
     }
 
+    public function export_major_areas(){
+    
+        ini_set('memory_limit', '16384M');
+        ini_set('max_execution_time', '900');
+
+        $mjAreas = MajorArea::with("getCreatedBy", "getMajorAreaCity")->get();
+        $csvHeaders = ["S.No", "Major Area", "City", "Created By"];
+
+        $fileName = 'MajorAreasList-' . now()->format('Y-m-d-H-i-s') . '.csv';
+        $handle = fopen($fileName, "w");
+
+        fputcsv($handle, $csvHeaders);
+
+        foreach ($mjAreas as $key => $value) {
+            fputcsv($handle, [
+                $key + 1,
+                $value->major_area_name,
+                $value->getMajorAreaCity->city_name,
+                $value->getCreatedBy->name." - ".$value->getCreatedBy->login_id
+            ]);
+        }
+
+        fclose($handle);
+
+        return response()->download($fileName)->deleteFileAfterSend(true);
+    
+        unset($fileName);
+        exit(0);
+    }
+
+    public function manage_minor_areas(Request $request){
+        if($request->ajax()){
+            
+        }
+    }
 
     public function logout(){
         Auth::logout();

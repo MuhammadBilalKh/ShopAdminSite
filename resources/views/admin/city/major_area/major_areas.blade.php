@@ -8,7 +8,7 @@
             <h6 id="modalHeader">Major Areas Management</h6>
             <div class="row">
                 <div class="col-sm-12">
-                    {{ html()->a(route('admin.export_cities'))->class('btn-info-custom btn-sm')->id('btnExportCities')->text('Export To CSV')->style('padding:.45rem 1rem; border-radius: 8px') }}
+                    {{ html()->a(route('admin.export_major_areas'))->class('btn-info-custom btn-sm')->id('btnExportCities')->text('Export To CSV')->style('padding:.45rem 1rem; border-radius: 8px') }}
                     {{ html()->button('Create Major Area')->class('btn-primary-custom btn-sm')->style('padding:.45rem 1rem; border-radius: 8px')->attributes(['data-bs-toggle' => 'modal', 'data-bs-target' => '#majorAreaModal'])->id('btnAddMajorArea') }}
                 </div>
             </div>
@@ -102,7 +102,7 @@
 
             $("label[for^='dt-length-']").addClass("mx-2");
 
-            $(document).on("select", function() {
+            $(document).on("change","select", function() {
                 tblMajorAreas.ajax.reload();
             });
 

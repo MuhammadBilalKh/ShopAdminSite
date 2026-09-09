@@ -26,4 +26,8 @@ class MajorArea extends Model
     public function setMajorAreaNameAttribute($value){
         return $this->attributes['major_area_name'] = ucwords($value);
     }
+
+    public function getMinorAreas(){
+        return $this->hasMany(MajorArea::class, "major_area_id", "major_area_id");
+    }
 }
