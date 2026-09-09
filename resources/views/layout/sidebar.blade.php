@@ -19,10 +19,9 @@
                     {{ '0' }}
                 @endif
             </span></a>
-        <div class="sidebar-section-title mt-2">Store</div>
-        <a class="sidebar-link" href="../index.html" target="_blank"><i class="ri-external-link-line"></i> View
-            Store</a>
-        <a class="sidebar-link" href="../index.html" target="_blank"><i class="ri-coupon-line"></i> Coupons</a>
+        <div class="sidebar-section-title mt-2">Region Management</div>
+        <a class="sidebar-link" href="{{ route('admin.cities') }}"><i class="ri-map-pin-line"></i> City</a>
+        <a class="sidebar-link" href="{{ route('admin.city_major_areas') }}"><i class="ri-gps-fill"></i> Major Area(s)</a>
         <div class="sidebar-section-title mt-2">Account</div>
         <a class="sidebar-link" href="#" id="logoutLink"><i class="ri-logout-box-line"></i> Logout</a>
     </nav>

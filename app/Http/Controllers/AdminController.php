@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\Tag;
+use App\Models\City;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\MajorArea;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\ProductHasTag;
@@ -261,6 +263,7 @@ class AdminController extends Controller
             readfile($fileName);
         }
         
+        unset($fileName);
         exit(0);
     }
 
@@ -495,6 +498,7 @@ class AdminController extends Controller
             readfile($fileName);
         }
         
+        unset($fileName);
         exit(0);
     }
 
@@ -502,6 +506,214 @@ class AdminController extends Controller
         $recentActivities = RecentActivity::orderByDesc("created_at")->simplePaginate(10);
         return view('admin.recent_activities', compact('recentActivities'));
     }
+
+    public function manage_cities(Request $request){
+        $cityQuery = City::query();
+
+        if($request->ajax()){
+            $dt = new DataTables();
+
+            if ($request->filled("city_name")) {
+                $cityQuery->where('city_name', 'LIKE', '%' . $request->city_name . '%');
+            }
+
+            if ($request->filled("iata_code")) {
+                $cityQuery->where('iata_code', 'LIKE', '%' . $request->iata_code . '%');
+            }
+
+            return $dt->eloquent($cityQuery)
+                    ->addIndexColumn()
+                    ->addColumn("actions", function($data){
+                        return html()->button("")->attributes(['data-bs-toggle' => "modal", 'data-bs-target' => "#cityModal"])->class("btn-action float-end edit edit-btn")->html("<i class='ri-pencil-line'></i>")->id(Crypt::encrypt($data->city_id));
+                    })
+                    ->make(true);
+        }
+
+        return view('admin.city.cities');
+    }
+
+    public function create_city(Request $request){
+        $city = new City();
+
+        if($request->isMethod("POST")){
+            $request->validate([
+                'city_name' => "required|min:3|unique:cities,city_id",
+                'iata_code' => "required|min:1|unique:cities,city_id"
+            ],[
+                'city_name.required' => "City Name Is Required",
+                'iata_code.required' => "City Iata Code Is Required",
+                'city_name.unique' => "City Name $request->city_name Already Exists"
+            ]);
+    
+            $city->city_name = $request->city_name;
+            $city->iata_code = $request->iata_code;
+
+            $city->save();
+
+            RecentActivity::create([
+                'model_id' => $city->city_id,
+                'model_class' => City::class,
+                'activity_description' => Auth::user()->name. " Have Created The City: ".$city->city_name
+            ]);
+
+            return response()->json(['status' => REQUEST_PROCESSED_SUCCESSFULLY, 'message' => "City Created Successfully."]);
+        }
+
+        return view('admin.city.create');
+    }
+
+    public function edit_city(Request $request, $id){
+        $decID = Crypt::decrypt($id);
+        $cityData  = City::findOrFail($decID);
+
+        if($request->isMethod('POST')){
+            $request->validate([
+                'city_name' => "required|min:3|unique:cities,city_id,$id,city_id",
+                'iata_code' => "required|min:1|unique:cities,city_id,$id,city_id"
+            ],[
+                'city_name.required' => "City Name Is Required",
+                'iata_code.required' => "City Iata Code Is Required",
+                'city_name.unique' => "City Name $request->city_name Already Exists"
+            ]);
+
+            $cityData->city_name = $request->city_name;
+            $cityData->iata_code = $request->iata_code;
+
+            $cityData->save();
+
+            RecentActivity::create([
+                'model_id' => $cityData->city_id,
+                'model_class' => City::class,
+                'activity_description' => Auth::user()->name. " Have Updated The City: ".$cityData->city_name
+            ]);
+
+            return response()->json(['status' => REQUEST_PROCESSED_SUCCESSFULLY, 'message' => "City Updated Successfully."]);
+        }
+
+        return view('admin.city.edit', compact('cityData'));
+    }
+
+    public function export_cities(){
+        ini_set('memory_limit', '16384M');
+        ini_set('max_execution_time', '900');
+
+        $categoryData = City::all()->toArray();
+        $csvHeaders = ["S.No", "City Name","Iata Code"];
+
+        $fileName = 'AllCities-' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        $handle = fopen($fileName, 'w');
+
+        if ($handle === false) {
+            die("Can't open file");
+        }
+
+        fputcsv($handle, $csvHeaders);
+        foreach($categoryData as $key => $value){
+            fputcsv($handle, [
+                $key + 1,
+                $value["city_name"],
+                $value["iata_code"],
+            ]);
+        }
+
+        fclose($handle);
+
+        if (isset($fileName)) {
+            header('Content-Type:text/plain; charset=ISO-8859-15');
+            header('Content-Disposition: attachment; filename="' . basename($fileName) . '"');
+            header('Content-Length: ' . filesize($fileName));
+            readfile($fileName);
+        }
+        
+        unset($fileName);
+        exit(0);
+    }
+
+    public function manage_major_areas(Request $request){
+        if($request->ajax() ){
+            $dt = new DataTables();
+
+            $majorAreaQuery = MajorArea::with("getMajorAreaCity", "getCreatedBy")->newQuery();
+
+            $majorAreaQuery->orderbyDesc("created_at");
+            return $dt->eloquent($majorAreaQuery)
+                    ->addIndexColumn()
+                    ->addColumn("actions", function($data){
+                        return html()->button("")->attributes(['data-bs-toggle' => "modal", 'data-bs-target' => "#majorAreaModal"])->class("btn-action edit edit-btn")->html("<i class='ri-pencil-line'></i>")->id(Crypt::encrypt($data->major_area_id));  
+                    })
+                    ->rawColumns(['actions'])
+                    ->make(true);
+        }
+
+        $cities = City::pluck("city_name", "city_id")->toArray();
+        return view('admin.city.major_area.major_areas', compact('cities'));
+    }
+
+    public function create_major_area(Request $request){
+        if($request->isMethod("POST") && $request->ajax() ){
+            $request->validate([
+                'major_area_name' => 'required|min:3',
+                'major_area_city' => "required|exists:cities,city_id",
+            ]);
+
+            $cityData = City::findOrFail($request->major_area_city);
+            $nMajorArea = MajorArea::create([
+                'major_area_name' => $request->major_area_name,
+                'city_id' => $request->major_area_city,
+                'created_by' => Auth::user()->user_id
+            ]);
+
+            RecentActivity::create([
+                'model_class' => MajorArea::class,
+                'model_id' => $nMajorArea->major_area_id,
+                'activity_description' => Auth::user()->name ." Have Created $nMajorArea->major_area_name Under The City ".$cityData->city_name 
+            ]);
+
+            return response()->json(['status' => REQUEST_PROCESSED_SUCCESSFULLY, 'message' => "Major Area Created Successfully"]);
+        }
+
+        if($request->filled('view_form') && $request->view_form == 1){
+            return view('admin.city.major_area._form', [
+                'cities' => City::pluck("city_name", "city_id")->toArray(),
+                'action' => route('admin.submit_major_area')
+            ])->render();
+        }
+    }
+
+    public function edit_major_area(Request $request, $id){
+        $decID = Crypt::decrypt($id);
+        $mjArea = MajorArea::findOrFail($decID);
+
+        if($request->isMethod("POST")){
+            $request->validate([
+                'major_area_name' => 'required|min:3',
+                'major_area_city' => "required|exists:cities,city_id",
+            ]);
+
+            $cityData = City::findOrFail($request->major_area_city);
+
+            $mjArea->major_area_name = $request->major_area_name;
+            $mjArea->city_id = $request->major_area_city;
+
+            $mjArea->save();
+
+            RecentActivity::create([
+                'model_class' => MajorArea::class,
+                'model_id' => $mjArea->major_area_id,
+                'activity_description' => Auth::user()->name ." Have Updated The Major Area $mjArea->major_area_name Under The City ".$cityData->city_name 
+            ]);
+
+            return response()->json(['status' => REQUEST_PROCESSED_SUCCESSFULLY, 'message' => "Major Area Updated Successfully"]);
+        }
+
+        return view('admin.city.major_area._form', [
+            'cities' => City::pluck("city_name", "city_id")->toArray(),
+            'action' => route('admin.update_major_area', ['id' => Crypt::encrypt($decID)]),
+            'majorAreaData' => $mjArea
+        ])->render();
+    }
+
 
     public function logout(){
         Auth::logout();

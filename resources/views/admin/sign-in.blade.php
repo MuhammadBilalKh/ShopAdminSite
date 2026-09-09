@@ -18,7 +18,7 @@
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="auth-card">
-                    <div class="auth-logo">{{ APPLICATION_NAME }}</div>
+                    <div class="auth-logo">{{ __(APPLICATION_NAME) }}</div>
                     <p class="text-center text-muted mb-4" style="font-size:.88rem">Welcome back! Sign in to your
                         account.</p>
 

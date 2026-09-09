@@ -17,6 +17,24 @@ Route::prefix("site-administrator")->group(function(){
         Route::get("/", [AdminController::class, 'show_admin_dashboard'])->name("admin.show_admin_dashboard");
         Route::get("/recent-activities", [AdminController::class, 'view_recent_activities'])->name("admin.view_recent_activities");
         
+        Route::prefix("region-management")->group(function(){
+            Route::prefix("city")->group(function(){
+                Route::get("/", [AdminController::class, 'manage_cities'])->name("admin.cities");
+                Route::get("/create", [AdminController::class, 'create_city'])->name("admin.create_city");
+                Route::get("/{id}/edit", [AdminController::class, 'edit_city'])->name('admin.edit_city');
+                Route::get("/export", [AdminController::class, 'export_cities'])->name('admin.export_cities');
+
+                Route::get("/major-areas", [AdminController::class, 'manage_major_areas'])->name("admin.city_major_areas");
+                Route::get("/major-area/create", [AdminController::class, 'create_major_area'])->name('admin.create_major_area');
+                Route::get("/major-area/{id}/edit", [AdminController::class, 'edit_major_area'])->name('admin.edit_major_area');
+                Route::get("/major-area/{id}/update", [AdminController::class, 'edit_major_area'])->name('admin.update_major_area');
+
+                Route::post("/submit-major-area", [AdminController::class, 'create_major_area'])->name('admin.submit_major_area');
+                Route::post("/major-area/{id}/update", [AdminController::class, 'edit_major_area'])->name('admin.update_city');
+                Route::post("/store", [AdminController::class, 'create_city'])->name('admin.store_city');
+            });
+        });
+
         Route::prefix("product")->group(function(){
             Route::get("/products-list", [AdminController::class, "product_lists"])->name("admin.show_product_lists");
             Route::get("/product/create", [AdminController::class, 'create_product'])->name('admin.create_product');
