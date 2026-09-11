@@ -22,4 +22,8 @@ class MinorArea extends Model
     public function getMajorArea(){
         return $this->belongsTo(MajorArea::class, "major_area_id", "major_area_id");
     }
+
+    public function setMinorAreaNameAttribute($val){
+        return $this->attributes['minor_area_name'] = ucwords($val);
+    }
 }

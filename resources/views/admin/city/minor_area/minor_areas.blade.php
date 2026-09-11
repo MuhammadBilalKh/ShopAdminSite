@@ -8,27 +8,28 @@
             <h6 id="modalHeader">Major Areas Management</h6>
             <div class="row">
                 <div class="col-sm-12">
-                    {{ html()->a(route('admin.export_major_areas'))->class('btn-info-custom btn-sm')->id('btnExportCities')->text('Export To CSV')->style('padding:.45rem 1rem; border-radius: 8px') }}
-                    {{ html()->button('Create Major Area')->class('btn-primary-custom btn-sm')->style('padding:.45rem 1rem; border-radius: 8px')->attributes(['data-bs-toggle' => 'modal', 'data-bs-target' => '#majorAreaModal'])->id('btnAddMajorArea') }}
+                    {{ html()->a(route('admin.export_minor_areas'))->class('btn-info-custom btn-sm')->id('btnExportMinorAreas')->text('Export To CSV')->style('padding:.45rem 1rem; border-radius: 8px') }}
+                    {{ html()->button('Create Minor Area')->class('btn-primary-custom btn-sm')->style('padding:.45rem 1rem; border-radius: 8px')->attributes(['data-bs-toggle' => 'modal', 'data-bs-target' => '#minorAreaModal'])->id('btnAddMinorArea') }}
                 </div>
             </div>
         </div>
 
         <div class="admin-table-wrap table-responsive">
-            <table class="table admin-table" id="tblMajorAreas">
+            <table class="table admin-table" id="tblMinorAreas">
                 <thead>
                     <tr>
-                        <th>Major Area Name</th>
                         <th>City</th>
+                        <th>Minor Area</th>
+                        <th>Major Area</th>
                         <th>Created By</th>
-                        <th>Action</th>
+                        {{-- <th>Actions</th> --}}
                     </tr>
                     <tr>
+                        <th>{{ html()->select('city_name', $cities)->class(TEXTBOX_CLASS)->id('cityDrp')->placeholder('Select') }}
                         <th>{{ html()->text('major_area_name')->class(TEXTBOX_CLASS)->id('txtMajorAreaName') }}</th>
-                        <th>{{ html()->select('city_name', $cities)->class(TEXTBOX_CLASS)->id('slctCity')->placeholder('Select') }}
-                        </th>
+                        <th>{{ html()->text('minor_area_name')->class(TEXTBOX_CLASS)->id('txtMinorAreaName') }}</th>
                         <th></th>
-                        <th></th>
+                        {{-- <th></th> --}}
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -36,7 +37,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="majorAreaModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal fade" id="minorAreaModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -54,7 +55,7 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            const tblMajorAreas = $("#tblMajorAreas").DataTable({
+            const tblMinorAreas = $("#tblMinorAreas").DataTable({
                 ordering: false,
                 searching: false,
                 processing: true,
@@ -62,11 +63,12 @@
                 dom: '<"row"<"col-md-12 d-flex justify-content-between mb-3"<"dataTables_info"i><"dataTables_length"l>>>t<"row"<"col-md-12 mt-3"p>>',
                 searching: false,
                 ajax: {
-                    url: "{{ route('admin.city_major_areas') }}",
+                    url: "{{ route('admin.manage_minor_areas') }}",
                     type: "GET",
                     data: function(req) {
                         req.major_area_name = $("#txtMajorAreaName").val();
-                        req.city_name = $("#slctCity").val();
+                        req.city_name = $("#cityDrp").val();
+                        req.minor_area_name = $("#txtMinorAreaName").val();
                     }
                 },
                 orderCellsTop: true,
@@ -74,15 +76,22 @@
                 order: [],
                 autoWidth: false,
                 columns: [{
-                        data: "major_area_name",
-                        name: "major_area_name"
+                        data: null,
+                        name: null,
+                        render: function(val) {
+                            return val.get_major_area.get_major_area_city.city_name
+                        }
                     },
                     {
                         data: null,
                         name: null,
                         render: function(val) {
-                            return val.get_major_area_city.city_name
+                            return val.get_major_area.major_area_name
                         }
+                    },
+                    {
+                        data: "minor_area_name",
+                        name: "minor_area_name"
                     },
                     {
                         data: null,
@@ -93,23 +102,23 @@
                                 .login_id + ")"
                         }
                     },
-                    {
-                        data: "actions",
-                        name: "actions"
-                    }
+                    // {
+                    //     data: "actions",
+                    //     name: "actions"
+                    // }
                 ]
             });
 
             $("label[for^='dt-length-']").addClass("mx-2");
 
-            $(document).on("change","select", function() {
-                tblMajorAreas.ajax.reload();
+            $(document).on("change", "#cityDrp", function() {
+                tblMinorAreas.ajax.reload();
             });
 
             $(document).on("keydown", "input", function(e) {
                 if (e.key === "Enter") {
                     e.preventDefault();
-                    tblMajorAreas.ajax.reload();
+                    tblMinorAreas.ajax.reload();
                 }
             });
 
@@ -119,10 +128,10 @@
                 }
             });
 
-            $("#btnAddMajorArea").on("click", function() {
-                $("#productModalTitle").text("Add New Major Area");
+            $("#btnAddMinorArea").on("click", function() {
+                $("#productModalTitle").text("Add New Minor Area");
                 $.ajax({
-                    url: "{{ route('admin.create_major_area') }}",
+                    url: "{{ route('admin.create_minor_area') }}",
                     type: "GET",
                     data: {
                         view_form: 1
@@ -139,11 +148,11 @@
             });
 
             $(document).on("click", ".edit", function() {
-                let mjID = $(this).attr("id");
-                $("#productModalTitle").text("Edit Major Area Detail");
+                let mnID = $(this).attr("id");
+                $("#productModalTitle").text("Edit Minor Area Detail");
 
-                let baseRoute = "{{ route('admin.edit_major_area', ['id' => 'PLACEHOLDER_ID']) }}";
-                let editProductURL = baseRoute.replace('PLACEHOLDER_ID', mjID);
+                let baseRoute = "{{ route('admin.edit_minor_area', ['id' => 'PLACEHOLDER_ID']) }}";
+                let editProductURL = baseRoute.replace('PLACEHOLDER_ID', mnID);
 
                 $.ajax({
                     url: editProductURL,
@@ -158,6 +167,7 @@
                     success: function(resp) {
                         $(".modal-body").delay(5000);
                         $(".modal-body").html(resp);
+                        $("#slctCity").trigger("change");
                     }
                 });
             });
@@ -166,7 +176,7 @@
 
                 e.preventDefault();
 
-                const form = document.getElementById("frmMajorArea");
+                const form = document.getElementById("frmMinorArea");
                 const formData = new FormData(form);
                 const actionUrl = formData.get('form_action_route');
 
@@ -189,7 +199,7 @@
 
                             setTimeout(() => {
                                 $(".btn-close").trigger("click");
-                                tblMajorAreas.ajax.reload();
+                                tblMinorAreas.ajax.reload();
                             }, 1500);
 
                         } else {
@@ -215,14 +225,60 @@
                             errorHtml += '</div>';
 
                             $('#error-container').html(errorHtml).fadeIn();
+                            $(this).removeAttr("disabled");
+                            $(this).text("Submit");
                             return false;
                         }
-                        $(this).removeAttr("disabled");
-                        $(this).text("Submit");
                         $(".modal-body").html(
                             "<h3 class='text-center text-danger'>An Error Occured While Processing Your Request. Please Try Again Later</h3>"
                         );
                     }
+                });
+            });
+
+            $(document).on("change", "#slctCity", function() {
+                $.ajax({
+                    url: "{{ route('admin.get_city_major_area') }}",
+                    type: "POST",
+                    data: {
+                        cityID: $("#slctCity").val()
+                    },
+                    beforeSend: function() {
+                        $("#slctMajorArea").html('');
+                    },
+                    success: function(resp) {
+
+                        let data = resp.data;
+
+                        if (resp.status == 1) {
+
+                            $("#slctMajorArea").html(
+                                "<option value=''>Select</option>"
+                            );
+
+                            if (!Array.isArray(data)) {
+                                data = Object.values(data);
+                            }
+
+                            console.clear();
+                            console.dir(resp.data);
+
+                            resp.data.forEach(function(mjArr) {
+
+                                $("#slctMajorArea").append(
+                                    "<option value='" + mjArr.major_area_id + "'>" +
+                                    mjArr.major_area_name +
+                                    "</option>"
+                                );
+
+                            });
+
+                        } else {
+                            $("#slctMajorArea").html(
+                                "<option value=''>No Major Area Found</option>"
+                            );
+                        }
+                    },
                 });
             });
 

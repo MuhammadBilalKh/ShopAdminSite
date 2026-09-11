@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\MajorArea;
+use App\Models\MinorArea;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\ProductHasTag;
@@ -748,15 +749,152 @@ class AdminController extends Controller
         fclose($handle);
 
         return response()->download($fileName)->deleteFileAfterSend(true);
-    
-        unset($fileName);
-        exit(0);
+
     }
 
     public function manage_minor_areas(Request $request){
         if($request->ajax()){
+            $dt = new DataTables();
             
+            $mnAreaQuery = MinorArea::with("getMajorArea", "getMajorArea.getMajorAreaCity","getCreatedBy")->newQuery();
+
+            if($request->filled('minor_area_name')){
+                $mnAreaQuery->where('minor_area_name', 'LIKE', '%' . $request->minor_area_name . '%');
+            }
+
+            if($request->filled("major_area_name")){
+                $mnAreaQuery->whereHas('getMajorArea', function ($query) use ($request) {
+                    $query->where('major_area_name', 'LIKE', '%' .$request->city_name. "%");
+                });
+            }
+
+            if($request->filled("city_name")){
+                $mnAreaQuery->whereHas('getMajorArea', function ($query) use ($request) {
+                    $query->where('city_id', $request->city_name);
+                });
+            }
+
+            return $dt->eloquent($mnAreaQuery)
+                   ->addIndexColumn()
+                   ->addColumn("actions", function($data){
+                        return html()->a(route('admin.edit_minor_area', ['id' => Crypt::encrypt($data->minor_area_id)]))->class("btn-action edit edit-btn")->html("<i class='ri-pencil-line'></i>")->target("_blank");  
+                    })
+                    ->rawColumns(['actions'])
+                   ->make(true);
         }
+
+        return view('admin.city.minor_area.minor_areas', [
+            'cities' => City::pluck("city_name", "city_id")->toArray()
+        ]);
+    }
+
+    public function create_minor_area(Request $request){
+        if($request->isMethod("POST")) {
+            $request->validate([
+                "minor_area_name" => "required|min:3",
+                'major_area_name' => "required|numeric|exists:major_areas,major_area_id",
+                'city_name' => "required|numeric|exists:cities,city_id"
+            ]);
+
+            $mnArea = MinorArea::create([
+                'minor_area_name' => $request->minor_area_name,
+                'major_area_id' => $request->major_area_name,
+                'created_by' => Auth::user()->user_id
+            ]);
+
+            $mjArName = MajorArea::where(['major_area_id' => $request->major_area_id])->value("major_area_name");
+ 
+            RecentActivity::create([
+                'model_class' => MinorArea::class,
+                'model_id' => $mnArea->minor_area_id,
+                'activity_description' => Auth::user()->name." Have Created The Minor Area ".$mnArea->minor_area_name." Under The Major Area ".$mjArName
+            ]);
+
+            return response()->json(['status' => REQUEST_PROCESSED_SUCCESSFULLY, 'message' => "Minor Area Added Successfully."]);
+        }
+
+        return view('admin.city.minor_area._form', [
+            'minor_area_data' => null,
+            'formType' => "create",
+            'cities' => City::pluck('city_name', "city_id")->toArray(),
+            'action' => route('admin.store_minor_area')
+        ]);
+    }
+
+    public function edit_minor_area(Request $request, $id){
+        $decID = Crypt::decrypt($id);
+        $mnArea = MinorArea::with("getMajorArea", "getMajorArea.getMajorAreaCity")->findOrFail($decID);
+        
+        if($request->isMethod("POST")) {
+            $request->validate([
+                "minor_area_name" => "required|min:3",
+                'major_area_name' => "required|numeric|exists:major_areas,major_area_id",
+                'city_name' => "required|numeric|exists:cities,city_id"
+            ]);
+
+            $mnArea->minor_area_name = $request->minor_area_name;
+            $mnArea->major_area_name = $request->major_area_name;
+
+            $mnArea->save();
+
+            $mjArName = MajorArea::where(['major_area_id' => $request->major_area_id])->value("major_area_name");
+ 
+            RecentActivity::create([
+                'model_class' => MinorArea::class,
+                'model_id' => $mnArea->minor_area_id,
+                'activity_description' => Auth::user()->name." Have Updted The Minor Area  Details ".$mnArea->minor_area_name." Under The Major Area ".$mjArName
+            ]);
+
+            return response()->json(['status' => REQUEST_PROCESSED_SUCCESSFULLY, 'message' => "Minor Area Updated Successfully."]);
+        }
+
+        return view('admin.city.minor_area.edit', [
+            'formType' => "edit",
+            'minor_area_data' => $mnArea,
+            'cities' => City::pluck("city_name", "city_id")->toArray(),
+            'action' => route('admin.update_major_area', ['id' => Crypt::encrypt($mnArea->minor_area_id)])
+        ])->render();
+    }
+
+    public function get_city_major_areas(Request $request){
+        $cityID = City::where(['city_id' => $request->cityID])->first();
+
+        if($cityID == null){
+            return response()->json(['status' => 0, 'message' => "Invalid City Name"]);
+        }
+
+        $cityMajorAreas = MajorArea::where(['city_id' => $request->cityID])->select("major_area_name", "major_area_id")->get();
+
+        return response()->json(['status' => REQUEST_PROCESSED_SUCCESSFULLY, 'data' => $cityMajorAreas]);
+    }
+
+    public function export_minor_areas(){
+    
+        ini_set('memory_limit', '16384M');
+        ini_set('max_execution_time', '900');
+
+        $mjAreas = MinorArea::with("getCreatedBy", "getMajorArea","getMajorArea.getMajorAreaCity")->get();
+        $csvHeaders = ["S.No", "City", "Major Area", "Minor Area", "Created By"];
+
+        $fileName = 'MinorAreasLists-' . now()->format('Y-m-d-H-i-s') . '.csv';
+        $handle = fopen($fileName, "w");
+
+        fputcsv($handle, $csvHeaders);
+
+        foreach ($mjAreas as $key => $value) {
+            fputcsv($handle, [
+                $key + 1,
+                $value->getMajorArea->getMajorAreaCity->city_name,
+                $value->getMajorArea->major_area_name,
+                $value->minor_area_name,
+                $value->getCreatedBy->name." - ".$value->getCreatedBy->login_id
+            ]);
+        }
+
+        fclose($handle);
+
+        return response()->download($fileName)->deleteFileAfterSend(true);
+
     }
 
     public function logout(){

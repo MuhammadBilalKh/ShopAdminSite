@@ -31,10 +31,16 @@ Route::prefix("site-administrator")->group(function(){
                 Route::get("/major-area/export", [AdminController::class, 'export_major_areas'])->name('admin.export_major_areas');
 
                 Route::get("/minor-areas", [AdminController::class, 'manage_minor_areas'])->name('admin.manage_minor_areas');
-                
+                Route::get("/create-minor-areas", [AdminController::class, 'create_minor_area'])->name('admin.create_minor_area');
+                Route::get("/{id}/edit-minor-area", [AdminController::class, 'edit_minor_area'])->name('admin.edit_minor_area');
+                Route::get("/minor-areas/export", [AdminController::class, 'export_minor_areas'])->name("admin.export_minor_areas");
+
+                Route::post("/store", [AdminController::class, 'create_city'])->name('admin.store_city');
                 Route::post("/submit-major-area", [AdminController::class, 'create_major_area'])->name('admin.submit_major_area');
                 Route::post("/major-area/{id}/update", [AdminController::class, 'edit_major_area'])->name('admin.update_city');
-                Route::post("/store", [AdminController::class, 'create_city'])->name('admin.store_city');
+                Route::post("/store-minor-area", [AdminController::class, 'create_minor_area'])->name('admin.store_minor_area');
+                Route::post("/{id}/update-minor-area", [AdminController::class, 'edit_minor_area'])->name("admin.update_minor_area");
+                Route::post("/get-city-major_areas", [AdminController::class, 'get_city_major_areas'])->name('admin.get_city_major_area');
             });
         });
 

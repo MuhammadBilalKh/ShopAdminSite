@@ -17,4 +17,9 @@ class City extends Model
     public function setIataCodeAttribute($value){
         return $this->attributes['iata_code'] = strtoupper($value);
     }
+
+
+    public function getMajoreAreas(){
+        return $this->hasMany(City::class, "city_id", "city_id");
+    }
 }
