@@ -91,7 +91,8 @@ class AdminController extends Controller
                 if($request->stock_status == 'out-of-stock'){
                     $products->where(['quantity' => 0]);
                 } else if($request->stock_status == 'low-stock'){
-                    $products->where(['quantity'=> LOW_STOCK_QUANTITY]);
+                    $products->where('quantity', "<", LOW_STOCK_QUANTITY);
+                    $products->where('quantity', '>', 0);
                 } else {
                     $products->where('quantity', '>', LOW_STOCK_QUANTITY);
                 }
@@ -104,7 +105,7 @@ class AdminController extends Controller
                     return html()->button("")->attributes(['data-bs-toggle' => "modal", 'data-bs-target' => "#productModal"])->class("btn-action edit edit-btn")->html("<i class='ri-pencil-line'></i>")->id(Crypt::encrypt($data->product_id));
                 })
                 ->addColumn("stock_status", function($data){
-                    if($data->quantity <= LOW_STOCK_QUANTITY && $data->quantity > 0){
+                    if($data->quantity < LOW_STOCK_QUANTITY && $data->quantity > 0){
                         return "<span class='badge bg-warning'>Low Stock</span>";
                     } else if($data->quantity == 0){
                         return "<span class='badge bg-danger'>Out of Stock</span>";
@@ -307,8 +308,8 @@ class AdminController extends Controller
 
                 if($request->hasFile("product_image")){
                     $imageFile = $request->file("product_image");
-                    $uniqueImageName = $imageFile->hashName();
-                    $imageFile->move(public_path('product_profile_image'), $uniqueImageName);
+                    $productProfileImage = $imageFile->hashName();
+                    $imageFile->move(public_path('product_profile_image'), $productProfileImage);
                 }
                     
                 $product->product_name = $request->input("product_name");
@@ -393,12 +394,14 @@ class AdminController extends Controller
 
             try {
 
-                $productProfileImage = $productData->product_profile_image;
+                $uniqueImageName = "";
                 
                 if($request->hasFile("product_image")){
                     $imageFile = $request->file("product_image");
                     $uniqueImageName = $imageFile->hashName();
                     $imageFile->move(public_path('product_profile_image'), $uniqueImageName);
+                } else {
+                    $uniqueImageName = $productData->product_profile_image;
                 }
                 
                 DB::beginTransaction();
@@ -415,7 +418,7 @@ class AdminController extends Controller
                 $productData->regular_price = $request->product_price;
                 $productData->quantity = $request->stock_quantity;
                 $productData->sales_price = $request->sale_price;
-                $productData->product_profile_image = $productProfileImage;
+                $productData->product_profile_image = $uniqueImageName;
                 $productData->is_new = $request->input("is_new", 0);
                 $productData->is_featured = $request->input("is_featured", 0);
                 $productData->updated_by = Auth::user()->user_id;

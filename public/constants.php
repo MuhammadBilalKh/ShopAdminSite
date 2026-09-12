@@ -19,3 +19,5 @@ defined("LOW_STOCK_QUANTITY") || define("LOW_STOCK_QUANTITY", 50);
 defined("TEXTBOX_CLASS") || define("TEXTBOX_CLASS", "form-control");
 
 defined("REQUEST_PROCESSED_SUCCESSFULLY") || define("REQUEST_PROCESSED_SUCCESSFULLY", 1);
+
+defined("FEATURED_PRODUCT") || define("FEATURED_PRODUCT", 1);

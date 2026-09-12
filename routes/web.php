@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ShopController;
 use App\Http\Middleware\AuthUser;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get("/", [ShopController::class, 'index'])->name("shopping.index");
+Route::get("/product-detail", [ShopController::class, 'product_detail'])->name("shopping.product_detail");
 
 Route::prefix("site-administrator")->group(function(){
 

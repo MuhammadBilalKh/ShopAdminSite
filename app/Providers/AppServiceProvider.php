@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
 use App\Models\Order;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,5 +26,10 @@ class AppServiceProvider extends ServiceProvider
              'pending_orders',
              Order::where('order_status', 0)->count()
          );
+
+         View::composer('layout.shop.footer', function($view){
+            $categoryNames = Category::select("category_name")->get();
+            return $view->with("category_names", $categoryNames);
+         });
     }
 }

@@ -48,11 +48,37 @@ class Product extends Model
         }
     }
 
+    public function getStyledProductQuantityLabel($quantity){
+        if($quantity <= LOW_STOCK_QUANTITY && $quantity > 0){
+            return "<span class='badge bg-warning' style='font-size: 13px;'>Low Stock</span>";
+        } else if($quantity == 0){
+            return "<span class='badge bg-danger' style='font-size: 13px;'>Out Of Stock</span>";
+        } else {
+            return "<span class='badge bg-success' style='font-size: 13px;'>In-Stock</span>";
+        }
+    }
+
     public function getCreatedBy(){
         return $this->belongsTo(User::class, "created_by", "user_id");
     }
     
     public function getUpdatedBy(){
         return $this->belongsTo(User::class, "updated_by", "user_id");
+    }
+
+    public function getProductImages(){
+        return $this->hasMany(ProductImage::class, 'product_id', "product_id");
+    }
+
+    public function getSalePercentage($regPrice, $slPrice){
+        return ($slPrice * 100) / $regPrice;
+    }
+
+    public function getReivews(){
+        return $this->hasMany(ProductReview::class, "product_id", "product_id");
+    }
+
+    public function getDescriptionAttribute($val){
+        return $this->attributes['description'] = ucfirst($val);
     }
 }
