@@ -14,10 +14,9 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->unsignedBigInteger("customer_id")->autoIncrement();
             $table->string("full_name");
-            $table->unsignedTinyInteger("age");
             $table->string("mobile_number")->unique()->index();
             $table->string("cnic")->unique()->index();
-            $table->string("account_status");
+            $table->string("account_status")->default(1);
             $table->string("address");
             $table->string("email_address")->unique()->index();
             $table->string("password");

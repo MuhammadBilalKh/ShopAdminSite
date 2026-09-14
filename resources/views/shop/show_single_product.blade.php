@@ -3,13 +3,14 @@
         @if ($productData->is_new == 1)
             <span class="badge-new">NEW</span>
         @endif
-        <img src="{{ asset('product_profile_image/' . $productData->product_profile_image) }}" alt="{{ $productData->product_name }}"
-            loading="lazy">
+        <img src="{{ asset('product_profile_image/' . $productData->product_profile_image) }}"
+            alt="{{ $productData->product_name }}" loading="lazy">
         <div class="quick-view-overlay">
-            <a href="{{ route('shopping.product_detail', ['_id' => $productData->unique_product_id]) }}" target="_blank" class="btn">Quick View</a>
+            <a href="{{ route('shopping.product_detail', ['_id' => $productData->unique_product_id]) }}" target="_blank"
+                class="btn">Quick View</a>
         </div>
-        
-        @if(Auth::guard("customer")->user())
+
+        @if (Auth::guard('customer')->user())
             <button class="wishlist-btn " data-pid="{{ $productData->unique_product_id }}" title="Add to Wishlist">
                 <i class="ri-heart-line"></i>
             </button>
@@ -24,10 +25,10 @@
                 class="text-muted">(5)</small></div>
         <div class="price-wrap">
             @if (isset($productData->sales_price) && $productData->sales_price > 0)
-                <span class="price-current">Rs. {{ $productData->sales_price }}</span>
-                <span class="price-old">Rs. {{ $productData->regular_price }}</span>
+                <span class="price-current">Rs. {{ number_format($productData->sales_price) }}</span>
+                <span class="price-old">Rs. {{ number_format($productData->regular_price) }}</span>
             @else
-                <span class="price-current">Rs. {{ $productData->regular_price }}</span>
+                <span class="price-current">Rs. {{ number_format($productData->regular_price) }}</span>
             @endif
         </div>
         <button class="btn-add-cart" data-pid="{{ $productData->unique_product_id }}">

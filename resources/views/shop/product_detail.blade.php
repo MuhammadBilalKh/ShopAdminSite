@@ -64,12 +64,12 @@
 
                         <div class="price-wrap mb-3">
                             @if (isset($productData->sales_price) && $productData->sales_price > 0)
-                                <span class="price-current fs-3" id="detailPrice">Rs. {{ $productData->sales_price }}</span>
-                                <span class="price-old" id="detailOldPrice">Rs. {{ $productData->regular_price }}</span>
+                                <span class="price-current fs-3" id="detailPrice">Rs. {{ number_format($productData->sales_price) }}</span>
+                                <span class="price-old" id="detailOldPrice">Rs. {{ number_format($productData->regular_price) }}</span>
                                 <span class="tag-chip ms-2"
                                     id="detailDiscount">{{ number_format($productData->getSalePercentage($productData->regular_price, $productData->sales_price), 2) }}%</span>
                             @else
-                                <span class="price-current fs-3" id="detailPrice">{{ $productData->regular_price }}</span>
+                                <span class="price-current fs-3" id="detailPrice">{{ number_format($productData->regular_price) }}</span>
                             @endif
                         </div>
 

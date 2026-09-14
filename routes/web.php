@@ -3,10 +3,13 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ShopController;
 use App\Http\Middleware\AuthUser;
+use App\Http\Middleware\CustomerAuth;
 use Illuminate\Support\Facades\Route;
 
 Route::get("/", [ShopController::class, 'index'])->name("shopping.index");
 Route::get("/product-detail", [ShopController::class, 'product_detail'])->name("shopping.product_detail");
+Route::get("/show-all-products", [ShopController::class, 'showAllProducts'])->name("shopping.show_all_products");
+Route::get("/products", [ShopController::class, 'products_lists'])->name('shopping.products_lists');
 
 Route::prefix("site-administrator")->group(function(){
 
@@ -23,7 +26,7 @@ Route::prefix("site-administrator")->group(function(){
                 Route::get("/create", [AdminController::class, 'create_city'])->name("admin.create_city");
                 Route::get("/{id}/edit", [AdminController::class, 'edit_city'])->name('admin.edit_city');
                 Route::get("/export", [AdminController::class, 'export_cities'])->name('admin.export_cities');
-
+                
                 Route::get("/major-areas", [AdminController::class, 'manage_major_areas'])->name("admin.city_major_areas");
                 Route::get("/major-area/create", [AdminController::class, 'create_major_area'])->name('admin.create_major_area');
                 Route::get("/major-area/{id}/edit", [AdminController::class, 'edit_major_area'])->name('admin.edit_major_area');
@@ -34,7 +37,7 @@ Route::prefix("site-administrator")->group(function(){
                 Route::get("/create-minor-areas", [AdminController::class, 'create_minor_area'])->name('admin.create_minor_area');
                 Route::get("/{id}/edit-minor-area", [AdminController::class, 'edit_minor_area'])->name('admin.edit_minor_area');
                 Route::get("/minor-areas/export", [AdminController::class, 'export_minor_areas'])->name("admin.export_minor_areas");
-
+                
                 Route::post("/store", [AdminController::class, 'create_city'])->name('admin.store_city');
                 Route::post("/submit-major-area", [AdminController::class, 'create_major_area'])->name('admin.submit_major_area');
                 Route::post("/major-area/{id}/update", [AdminController::class, 'edit_major_area'])->name('admin.update_city');
@@ -44,16 +47,15 @@ Route::prefix("site-administrator")->group(function(){
             });
         });
 
-        Route::prefix("product")->group(function(){
+            Route::prefix("product")->group(function(){
             Route::get("/products-list", [AdminController::class, "product_lists"])->name("admin.show_product_lists");
             Route::get("/product/create", [AdminController::class, 'create_product'])->name('admin.create_product');
             Route::get("/{id}/edit", [AdminController::class, "edit_product"])->name("admin.edit_product_detail");
             Route::get("/export-products", [AdminController::class, 'export_all_products'])->name("admin.export_all_products");
-
             Route::post("/{id}/update", [AdminController::class, 'edit_product'])->name("admin.update_product_detail");
             Route::post("/product/store", [AdminController::class, 'create_product'])->name('admin.submit_create_product');
         });
-    
+        
         Route::prefix("product-category")->group(function(){
             Route::get("/", [AdminController::class, 'product_category_lists'])->name('admin.product_category_lists');
             Route::get("/create-category", [AdminController::class, 'create_category'])->name("admin.create_category");
@@ -65,12 +67,21 @@ Route::prefix("site-administrator")->group(function(){
             Route::post("/{id}/update", [AdminController::class, 'edit_product_category'])->name('admin.update_product_category');
             Route::post("/{id}/remove", [AdminController::class, 'delete_product_category'])->name("admin.remove_product_category");
         });
-
+          
         Route::get("/log-out", [AdminController::class, 'logout'])->name('admin.logout');
     });
-
+            
 });
 
-Route::fallback(function(){
-    return 'Not Found';
+Route::prefix("customers")->group(function(){
+    Route::get("/sign-in", [ShopController::class,'customer_sign_in'])->name("shopping.customer_sign_in");
+    Route::get("/sign-up", [ShopController::class, 'sign_up'])->name("shopping.sign_up");
+
+    Route::post("/store-new-customer", [ShopController::class, 'sign_up'])->name("shopping.store_new_customer");
+    Route::post("/authenticate/customer", [ShopController::class, 'customer_sign_in'])->name("shopping.authenticate_customer");
+
+    Route::middleware([CustomerAuth::class])->group(function(){
+        Route::get("/wishlist-cart-count", [ShopController::class, 'get_wishlist_and_cart_count'])->name("shopping.get_wishlist_and_cart_count");
+        Route::post("/add-to-cart/{productID}", [ShopController::class, 'add_to_cart'])->name("customer.add_to_cart");
+    });
 });

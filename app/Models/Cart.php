@@ -13,7 +13,6 @@ class Cart extends Model
         "customer_id",
         "price",
         "quantity",
-        "price"
     ];
 
     public function getCartProduct(){

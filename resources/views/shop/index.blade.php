@@ -27,7 +27,7 @@
                         </div>
                         <div class="text-white">
                             <div class="fw-800 fs-4">{{ number_format($hpCustomers) }}</div>
-                            <div style="font-size:.8rem;opacity:.7">Happy Customers</div>
+                            <div style="font-size:.8rem;opacity:.7">Registered Customer(s)</div>
                         </div>
                         @if (isset($avgRating) && $avgRating > 1.0)
                             <div class="text-white">
@@ -95,10 +95,47 @@
         </div>
     </section>
 
-    @include('shop.product_section', [
-        'productsArr' => $allProds,
-        'sectionID' => 'allProducts',
-        'productSectionName' => 'All Products',
-        'have_pagination' => 1,
-    ])
+    <div id="showAllProducts">
+
+    </div>
+
 @endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            loadProducts();
+
+            $(document).on("click", "#pagination a", function(e) {
+                e.preventDefault();
+                setTimeout(() => {
+                    loadProducts();
+                }, 1000);
+            });
+        });
+
+        function loadProducts() {
+            let currentHtml = $("#showAllProducts").html();
+            url = $(this).attr('href') == null ? "{{ route('shopping.show_all_products') }}" : $(this).attr("href");
+            $.ajax({
+                url: url,
+                type: 'GET',
+                beforeSend:function(){
+                    console.clear();
+                    console.log(url);
+                    $("#showAllProducts").html("<span class='fs-5 text-info'>Loading Products..</span>");
+                },
+                success: function(response) {
+                    $("#showAllProducts").html("");
+                    if(response.status == 1 || response.status == ''){
+                        $('#showAllProducts').html(response.products_view);
+                    }
+                },
+                error: function(xhr) {
+                    //alert("Failed To Load Products");
+                    $("#showAllProducts").html(currentHtml);
+                }
+            });
+        }
+    </script>
+@endpush

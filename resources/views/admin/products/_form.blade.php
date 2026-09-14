@@ -4,7 +4,7 @@
     style="display: none; color: red; background: #f8d7da; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
 </div>
 
-{{ html()->hidden("form_action_route")->value($action) }}
+{{ html()->hidden('form_action_route')->value($action) }}
 
 {{ html()->div()->class('row')->addChild(
         html()->div()->class('col-sm-8')->addChild(
@@ -22,25 +22,19 @@
             ),
     ) }}
 {{ html()->div()->class('row mt-3')->addChild([
-        html()->div()->class('col-sm-2')->addChild(
+        html()->div()->class('col-sm-3')->addChild(
                 html()->div()->class('form-group')->addChild([
                         html()->label('Regular Price: '),
                         html()->number('product_price')->class(TEXTBOX_CLASS)->value($productData?->regular_price),
                     ]),
             ),
-        html()->div()->class('col-sm-2')->addChild([
-                html()->div()->class('form-group')->addChild([
-                        html()->label('Sales Price (optional): '),
-                        html()->number('sale_price')->class(TEXTBOX_CLASS)->value($productData?->sales_price),
-                    ]),
-            ]),
-        html()->div()->class('col-sm-2')->addChild([
+        html()->div()->class('col-sm-3')->addChild([
                 html()->div()->class('form-group')->addChild([
                         html()->label('Stock Quantity: '),
                         html()->number('stock_quantity')->addClass(TEXTBOX_CLASS)->value($productData?->quantity),
                     ]),
             ]),
-        html()->div()->class('col-sm-3')->addChild(
+        html()->div()->class('col-sm-2')->addChild(
                 html()->div()->class('form-group mt-4')->addChildren([
                         html()->div()->class('form-check form-switch ms-1 mb-2')->addChild([
                                 html()->checkbox('is_featured')->class('form-check-input')->checked($productData?->is_featured),
@@ -89,7 +83,7 @@
     ) }}
 {{ html()->div()->class('row mt-3')->addChild(
         html()->div()->class('col-sm-3')->addChild([
-                html()->submit($formType == 'create' ? 'Submit' : 'Update')->class("btn btn-success m-2")->id('btnSubmit'),
+                html()->submit($formType == 'create' ? 'Submit' : 'Update')->class('btn btn-success m-2')->id('btnSubmit'),
                 html()->reset('Reset')->class('btn btn-secondary'),
             ]),
     ) }}

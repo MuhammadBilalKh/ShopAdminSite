@@ -16,4 +16,8 @@ class Tag extends Model
     public function setTagNameAttribute($val){
         $this->attributes["tag_name"] = trim($val);
     }
+
+    public function getProducts(){
+        return $this->hasMany(ProductHasTag::class, "tag_id", "product_tag_id");
+    }
 }

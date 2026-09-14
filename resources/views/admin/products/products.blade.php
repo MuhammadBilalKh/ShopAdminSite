@@ -237,10 +237,13 @@
                             errorHtml += '</div>';
 
                             $('#error-container').html(errorHtml).fadeIn();
+
+                            $("#btnSubmit").removeAttr("disabled");
+                            $("#btnSubmit").text("Submit");
+                        
                             return false;
                         }
-                        $(this).removeAttr("disabled");
-                        $(this).text("Submit");
+                        
                         $(".modal-body").html(
                             "<h3 class='text-center text-danger'>An Error Occured While Processing Your Request. Please Try Again Later</h3>"
                         );
