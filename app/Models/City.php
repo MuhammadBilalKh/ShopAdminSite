@@ -22,4 +22,8 @@ class City extends Model
     public function getMajoreAreas(){
         return $this->hasMany(City::class, "city_id", "city_id");
     }
+
+    public function getCityCustomers(){
+        return $this->hasMany(Customer::class, "city_id", "city_id");
+    }
 }

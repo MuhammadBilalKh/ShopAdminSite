@@ -15,11 +15,11 @@
             </button>
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav me-auto mt-2 mt-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link " href="products.html">Products</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ route('shopping.index') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/">Products</a></li>
 
                     @auth('customer')
-                        <li class="nav-item"><a class="nav-link " href="orders.html">My Orders</a></li>
+                        <li class="nav-item"><a class="nav-link " href="{{ route('shopping.customer_orders') }}">My Orders</a></li>
                     @endauth
                 </ul>
                 <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
@@ -31,7 +31,7 @@
                             </button>
                             <span class="badge-count wishlist-count" id="customerWishlist"></span>
                         </a>
-                        <a href="/cart" class="cart-badge">
+                        <a href="{{ route('shopping.view_cart') }}" class="cart-badge">
                             <button class="btn btn-light btn-sm rounded-circle" title="Cart"
                                 style="width:38px;height:38px">
                                 <i class="ri-shopping-cart-line"></i>

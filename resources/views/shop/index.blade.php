@@ -41,6 +41,14 @@
         </div>
     </section>
 
+    @if (session()->has('success'))
+        <div class="container">
+            <div class="alert alert-success m-3">
+                <span>{!! session()->get('success') !!}</span>
+            </div>
+        </div>
+    @endif
+
     @include('shop.product_section', [
         'productsArr' => $featuredProducts,
         'sectionID' => 'featured',
@@ -120,19 +128,18 @@
             $.ajax({
                 url: url,
                 type: 'GET',
-                beforeSend:function(){
+                beforeSend: function() {
                     console.clear();
                     console.log(url);
                     $("#showAllProducts").html("<span class='fs-5 text-info'>Loading Products..</span>");
                 },
                 success: function(response) {
                     $("#showAllProducts").html("");
-                    if(response.status == 1 || response.status == ''){
+                    if (response.status == 1 || response.status == '') {
                         $('#showAllProducts').html(response.products_view);
                     }
                 },
                 error: function(xhr) {
-                    //alert("Failed To Load Products");
                     $("#showAllProducts").html(currentHtml);
                 }
             });

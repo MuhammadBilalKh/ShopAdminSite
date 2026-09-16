@@ -96,7 +96,7 @@
 
                         <!-- CTA Buttons -->
                         <div class="d-flex gap-3 flex-wrap mb-4">
-                            <button class="btn-primary-custom flex-fill" id="addToCartBtn">
+                            <button class="btn-primary-custom flex-fill btn-add-cart" data-pid="{{ $productData->unique_product_id }}" id="addToCartBtn">
                                 <i class="ri-shopping-cart-add-line"></i> Add to Cart
                             </button>
                             @if (Auth::guard('customer')->user())

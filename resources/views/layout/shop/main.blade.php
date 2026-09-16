@@ -42,7 +42,7 @@
             }
         });
 
-        @if (Auth::guard('customer'))
+        @if (Auth::guard('customer')->user())
 
             $.ajax({
                 url: "{{ route('shopping.get_wishlist_and_cart_count') }}",

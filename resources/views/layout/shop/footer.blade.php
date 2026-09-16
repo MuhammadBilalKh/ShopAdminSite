@@ -3,7 +3,7 @@
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4 col-md-6">
-                    <div class="footer-brand mb-2">Shop<span>Zone</span></div>
+                    <div class="footer-brand mb-2">{{ APPLICATION_NAME }}</div>
                     <p style="font-size:.88rem;color:rgba(255,255,255,.55);max-width:280px">Your one-stop destination for
                         quality products at unbeatable prices.</p>
                     <div class="social-links mt-3">

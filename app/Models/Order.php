@@ -13,7 +13,9 @@ class Order extends Model
         'total_amount',
         'customer_id',
         'order_status',
-        'order_process_by'
+        'order_process_by',
+        'notes',
+        'remarks'
     ];
 
     public function orderProcessBy(){
@@ -22,5 +24,9 @@ class Order extends Model
 
     public function getOrderBy(){
         return $this->belongsTo(Customer::class, "customer_id" ,"customer_id");
+    }
+
+    public function getOrderLineItems(){
+        return $this->hasMany(OrderLineItem::class,"order_id", "order_id");
     }
 }

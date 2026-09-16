@@ -16,7 +16,8 @@ class Customer extends Authenticatable
         "full_name",
         "account_status",
         "email_address",
-        "password"
+        "password",
+        "city_id"
     ];
 
     public function getOrders(){
@@ -32,5 +33,13 @@ class Customer extends Authenticatable
         return [
             'password' => 'hashed',
         ];
+    }
+
+    public function getCartItems(){
+        return $this->hasMany(Cart::class, "customer_id", "customer_id");
+    }
+
+    public function getCustomerCity(){
+        return $this->hasOne(City::class, "city_id", "city_id");
     }
 }

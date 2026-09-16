@@ -80,8 +80,15 @@ Route::prefix("customers")->group(function(){
     Route::post("/store-new-customer", [ShopController::class, 'sign_up'])->name("shopping.store_new_customer");
     Route::post("/authenticate/customer", [ShopController::class, 'customer_sign_in'])->name("shopping.authenticate_customer");
 
+    Route::get("/cart", [ShopController::class, 'view_cart'])->name("shopping.view_cart");
+
     Route::middleware([CustomerAuth::class])->group(function(){
         Route::get("/wishlist-cart-count", [ShopController::class, 'get_wishlist_and_cart_count'])->name("shopping.get_wishlist_and_cart_count");
+        Route::get("/checkout", [ShopController::class, 'process_checkout'])->name("shopping.checkout");
+        Route::get("/Orders", [ShopController::class, 'customer_orders'])->name("shopping.customer_orders");
+
+        Route::post("/checkout/submit", [ShopController::class, 'process_checkout'])->name("shopping.submit_checkout");
         Route::post("/add-to-cart/{productID}", [ShopController::class, 'add_to_cart'])->name("customer.add_to_cart");
+        Route::post("/cart/manage", [ShopController::class, 'manage_customer_cart'])->name('customer.manage_customer_cart');
     });
 });
