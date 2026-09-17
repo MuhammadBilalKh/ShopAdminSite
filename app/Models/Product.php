@@ -19,7 +19,8 @@ class Product extends Model
         "product_profile_image",
         "unique_product_id",
         "created_by",
-        "updated_by"
+        "updated_by",
+        "warehouse_id"
     ];
 
     public function getProductCategory(){

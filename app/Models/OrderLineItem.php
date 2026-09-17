@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderLineItem extends Model
 {
+    protected $table = "orders_line_items";
     protected $fillable = [
         "order_id",
         "product_id",
@@ -14,7 +15,6 @@ class OrderLineItem extends Model
 
     protected $primaryKey = "orders_line_items";
 
-    protected $table = "orders_line_items";
 
     public function getMasterOrder(){
         return $this->hasOne(Order::class, "order_id", "order_id");

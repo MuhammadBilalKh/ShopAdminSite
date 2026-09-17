@@ -12,6 +12,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\OrderLineItem;
 use App\Models\ProductReview;
+use App\Models\ShippingMethod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -134,7 +135,7 @@ class ShopController extends Controller
         $cartItem = Cart::where(['customer_id' => $customerID])->get();
         $ordSummary = view('shop.order_summary', [
             'data' => $cartItem,
-            'cartItems' => $cartItem
+            'cartItems' => $cartItem,
         ])->render();
 
         return response()->json([
@@ -224,16 +225,19 @@ class ShopController extends Controller
                 ->where('customer_id', $customerId)
                 ->get();
 
-            return view('shop.order_checkout', compact('placeItems'));
+            $shippingMethods = ShippingMethod::where("status", STATUS_ACTIVE)->get();
+            return view('shop.order_checkout', compact('placeItems', "shippingMethods"));
         }
 
         $request->validate([
             'shipping_address' => 'required',
             'zip_code' => 'required|numeric',
+            'shipping' => "required|numeric|exists:shipping_methods,shipping_method_id"
         ], [
             'shipping_address.required' => 'Shipping Address Is Required',
             'zip_code.required' => 'City Zip Code Is Required',
-            'zip_code.numeric' => "Invalid Zip Code Format"
+            'zip_code.numeric' => "Invalid Zip Code Format",
+            "shipping.required" => "Please Select The Shipping Method"
         ]);
 
         $placeItems = Cart::with('getCartProduct')
@@ -288,7 +292,8 @@ class ShopController extends Controller
                 'total_amount' => ($totalAmount + 100),
                 'customer_id' => $customerId,
                 'order_status' => ORDER_STATUS_PENDING,
-                'notes' => $request->optional_notes
+                'notes' => $request->optional_notes,
+                'shipping_method_id' => $request->shipping
             ]);
 
             foreach ($placeItems as $cartItem) {

@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\ProductHasTag;
 use App\Models\RecentActivity;
+use App\Models\ShippingMethod;
+use App\Models\Warehouse;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -898,6 +900,94 @@ class AdminController extends Controller
 
         return response()->download($fileName)->deleteFileAfterSend(true);
 
+    }
+
+    public function shipping_method(Request $request){
+        if($request->ajax()){
+            $shpMethodQuery = ShippingMethod::query();
+
+            if($request->filled("shipping_method_status")){
+                $shpMethodQuery->where("status", $request->shipping_method_status);
+            }
+
+            if($request->filled("cost")){
+                $shpMethodQuery->where("cost", $request->cost);
+            }
+
+            if($request->filled("shipping_method_name")){
+                $shpMethodQuery->where('shipping_method_name', 'LIKE', '%' . $request->shipping_method_name . '%');
+            }
+            
+            return DataTables::of($shpMethodQuery)
+                ->addIndexColumn()
+                ->addColumn('actions', function($data){
+                    return html()->a(route('admin.edit_shipping_method', ['id' => $data->shipping_method_id]))->class("btn-action edit edit-btn")->html("<i class='ri-pencil-line'></i>");
+                })
+                ->rawColumns(["actions"])
+                ->make(true);
+        }
+
+        return view('admin.shipping_method.index');
+    }
+
+    public function create_shipping_method(Request $request){
+        if($request->isMethod("POST")){
+            $request->validate([
+                'cost' => "required|min_digits:2|numeric",
+                'shipping_method_name' => "required|min:3|unique:shipping_methods,shipping_method_name",
+                'status' => "required|numeric|in:1,0",
+                "shipping_method_description" => "required"
+            ]);
+
+            $nShipMethod = ShippingMethod::create([
+                'shipping_method_name' => $request->shipping_method_name,
+                'status' => $request->status,
+                'cost' => $request->cost,
+                'description' => $request->shipping_method_description
+            ]);
+
+            RecentActivity::create([
+                'activity_description' => Auth::user()->name." Have Created New Shipping Method $nShipMethod->shipping_method_name",
+                'model_id' => $nShipMethod->shipping_method_id,
+                'model_class' => ShippingMethod::class
+            ]);
+
+            return redirect()->route('admin.shipping_method')->with('success', "New Shipping Method Created Successfully.");
+        } else {
+            return view('admin.shipping_method.create');
+        }
+    }
+
+    public function edit_shipping_method(Request $request, $id){
+        $shippingMethodData = ShippingMethod::findOrFail($id);
+
+        if($request->isMethod("POST")){
+            $request->validate([
+                'shipping_method_name' => "required|min:3|unique:shipping_methods,shipping_method_name,$id,shipping_method_id",
+                'cost' => "required|min_digits:2|numeric",
+                'status' => "required|numeric|in:1,0",
+                "shipping_method_description" => "required"
+            ]);
+
+            $shippingMethodData->where("shipping_method_id", $id)->update([
+                'shipping_method_name' => $request->shipping_method_name,
+                'status' => $request->status,
+                'cost' => $request->cost,
+                'description' => $request->shipping_method_description
+            ]);
+
+            RecentActivity::create([
+                'activity_description' => Auth::user()->name." Have Updated The Shipping Method $shippingMethodData->shipping_method_name Detail(s)",
+                'model_id' => $shippingMethodData->shipping_method_id,
+                'model_class' => ShippingMethod::class
+            ]);
+
+            return redirect()->route('admin.shipping_method')->with('success', "Shipping Method Details Updated Successfully.");
+        } else {
+            return view('admin.shipping_method.edit', [
+                'shippingMethodData' => $shippingMethodData
+            ]);
+        }
     }
 
     public function logout(){

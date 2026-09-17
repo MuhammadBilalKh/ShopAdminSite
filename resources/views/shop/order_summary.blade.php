@@ -1,6 +1,5 @@
 @php
     $total = 0;
-    $shippingFees = 100;
 
     foreach ($data as $key => $value) {
         $total += $value->price * $value->quantity;
@@ -13,15 +12,11 @@
         <span id="summarySubtotal">Rs. {{ number_format($total) }}</span>
     </div>
     <div class="summary-row">
-        <span><i class="ri-truck-line me-1 text-primary"></i>Shipping</span>
-        <span id="summaryShipping" class="text-success"><span class="text-success">Rs.
-                {{ number_format($shippingFees) }}</span></span>
-    </div>
-    <div class="summary-row">
         <span class="summary-total">Total</span>
-        <span class="summary-total" id="summaryTotal">Rs. {{ number_format($total + $shippingFees) }}</span>
+        <span class="summary-total" id="summaryTotal">Rs. {{ number_format($total) }}</span>
     </div>
-    <a href="{{ route('shopping.checkout') }}" class="btn-primary-custom w-100 mt-3 d-flex justify-content-center" id="checkoutBtn">
+    <a href="{{ route('shopping.checkout') }}" class="btn-primary-custom w-100 mt-3 d-flex justify-content-center"
+        id="checkoutBtn">
         <i class="ri-shield-check-line me-2"></i>Proceed to Checkout
     </a>
     <div class="text-center mt-3">

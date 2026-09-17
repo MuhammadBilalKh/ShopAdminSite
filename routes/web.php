@@ -47,7 +47,16 @@ Route::prefix("site-administrator")->group(function(){
             });
         });
 
-            Route::prefix("product")->group(function(){
+        Route::prefix("shipping-method")->group(function(){
+            Route::get("/", [AdminController::class, 'shipping_method'])->name("admin.shipping_method");
+            Route::get("/create", [AdminController::class, 'create_shipping_method'])->name("admin.create_shipping_method");
+            Route::get("/{id}/edit", [AdminController::class, 'edit_shipping_method'])->name("admin.edit_shipping_method");
+
+            Route::post("/store", [AdminController::class, 'create_shipping_method'])->name("admin.submit_shipping_method");
+            Route::post("/{id}/update", [AdminController::class, "edit_shipping_method"])->name("admin.update_shipping_method");
+        });
+
+        Route::prefix("product")->group(function(){
             Route::get("/products-list", [AdminController::class, "product_lists"])->name("admin.show_product_lists");
             Route::get("/product/create", [AdminController::class, 'create_product'])->name('admin.create_product');
             Route::get("/{id}/edit", [AdminController::class, "edit_product"])->name("admin.edit_product_detail");

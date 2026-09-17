@@ -141,7 +141,6 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Shipping Method -->
                                     <div class="col-12">
                                         <label class="form-label">
                                             Shipping Method *
@@ -149,30 +148,39 @@
 
                                         <div class="d-flex flex-column gap-2">
 
-                                            <label
-                                                class="d-flex align-items-center gap-3 p-3 border rounded-3 shipping-option active"
-                                                style="cursor:pointer">
+                                            @foreach ($shippingMethods as $key => $value)
+                                                <label
+                                                    class="d-flex align-items-center gap-3 p-3 border rounded-3 shipping-option active"
+                                                    style="cursor:pointer">
 
-                                                <input type="radio" name="shipping" value="standard" checked
-                                                    class="form-check-input mt-0">
+                                                    <input type="radio" name="shipping" value="{{ $value->shipping_method_id }}"
+                                                        class="form-check-input chkShippingMethod mt-0" data-name="{{ $value->cost }}">
 
-                                                <div class="flex-fill">
-                                                    <div class="fw-700 small">
-                                                        Standard Shipping
+                                                    <div class="flex-fill">
+                                                        <div class="fw-700 small">
+                                                            {{ $value->shipping_method_name }}
+                                                        </div>
+                                                        <div class="text-muted" style="font-size:.78rem">
+                                                            {{ $value->description }}
+                                                        </div>
                                                     </div>
-                                                    <div class="text-muted" style="font-size:.78rem">
-                                                        5–7 business days
-                                                    </div>
-                                                </div>
 
-                                                <span class="fw-700" id="standardShipCost">
-                                                    <span class="text-success">
-                                                        Free
+                                                    <span class="fw-700" id="standardShipCost">
+                                                        <span class="text-success">
+                                                            Rs. {{ $value->cost }}
+                                                        </span>
                                                     </span>
-                                                </span>
 
-                                            </label>
+                                                </label>
+                                            @endforeach
 
+                                            @error('shipping')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+
+                                            <small>
+                                                <span id="txtOrderPlacementMsg"class="text-success"></span>
+                                            </small>
                                         </div>
                                     </div>
 
@@ -242,10 +250,6 @@
                                 Review Your Order
                             </h5>
 
-                            <div id="reviewShipping" class="mb-4">
-                                <!-- Existing review data can be populated by JavaScript -->
-                            </div>
-
                             <div id="reviewItems" class="mb-4">
                                 <h6 class="fw-700 mb-2">Items:</h6>
                             </div>
@@ -253,10 +257,8 @@
                             <div class="d-flex gap-3">
 
                                 <button class="btn btn-outline-secondary flex-fill" id="backToShipping">
-
                                     <i class="ri-arrow-left-line me-1"></i>
                                     Back
-
                                 </button>
 
                                 <button class="btn-primary-custom flex-fill justify-content-center" id="placeOrderBtn">
@@ -267,15 +269,10 @@
                                 </button>
 
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
 
-
-                <!-- RIGHT SIDE: ORDER SUMMARY -->
                 <div class="col-lg-5">
 
                     <div class="order-summary-card sticky-top" style="top:80px">
@@ -319,16 +316,9 @@
                         </div>
 
                         <div class="summary-row">
-                            <span>Shipping</span>
-                            <span id="ckShipping">
-                                <span class="text-success">Rs. 100</span>
-                            </span>
-                        </div>
-
-                        <div class="summary-row">
                             <span class="summary-total">Total</span>
-                            <span class="summary-total" id="ckTotal">
-                                Rs. {{ number_format($total + 100) }}
+                            <span class="summary-total" data-val="{{ $total }}" id="ckTotal">
+                                Rs. {{ number_format($total) }}
                             </span>
                         </div>
 
@@ -361,5 +351,13 @@
             }
 
         });
+
+        $(".chkShippingMethod").on("click", function(){
+            let shippingCharges = $(this).data("name");
+            let total = $("#ckTotal").data("val");
+            
+            let sum = Number(shippingCharges) + Number(total);
+            $("#txtOrderPlacementMsg").html("Your Total Bill Will Be Rs. "+sum);
+        })
     </script>
 @endpush

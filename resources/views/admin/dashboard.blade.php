@@ -74,8 +74,8 @@
                                     @forelse($recentOrders as $key => $value)
                                         <tr>
                                             <td>{{ $value->customer_order_id }}</td>
-                                            <td>{{ $value?->getOrderBy?->customer_name }}</td>
-                                            <td>{{ $value->total_amount }}</td>
+                                            <td>{{ $value->getOrderBy->full_name }}</td>
+                                            <td width="150">Rs. {{ number_format($value->total_amount )}}</td>
                                             <td>
                                                 @if ($value->status == ORDER_STATUS_PENDING)
                                                     <span class="badge-status pending">Pending</span>

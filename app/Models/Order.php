@@ -15,7 +15,8 @@ class Order extends Model
         'order_status',
         'order_process_by',
         'notes',
-        'remarks'
+        'remarks',
+        "shipping_method_id"
     ];
 
     public function orderProcessBy(){
@@ -28,5 +29,9 @@ class Order extends Model
 
     public function getOrderLineItems(){
         return $this->hasMany(OrderLineItem::class,"order_id", "order_id");
+    }
+
+    public function getShippingMethod(){
+        return $this->belongsTo(ShippingMethod::class, "shipping_method_id", "shipping_method_id");
     }
 }

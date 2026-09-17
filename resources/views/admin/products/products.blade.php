@@ -240,10 +240,10 @@
 
                             $("#btnSubmit").removeAttr("disabled");
                             $("#btnSubmit").text("Submit");
-                        
+
                             return false;
                         }
-                        
+
                         $(".modal-body").html(
                             "<h3 class='text-center text-danger'>An Error Occured While Processing Your Request. Please Try Again Later</h3>"
                         );

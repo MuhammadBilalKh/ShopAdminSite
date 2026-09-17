@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger("customer_id");
             $table->unsignedTinyInteger("order_status");
             $table->unsignedBigInteger("order_process_by");
+            $table->unsignedBigInteger("shipping_method_id");
             $table->timestamps();
         });
     }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string("warehouse_address")->index();
             $table->unsignedBigInteger("created_by")->index();
             $table->unsignedTinyInteger("status");
+            $table->unsignedInteger("shipping_cost");
             $table->timestamps();
         });
     }

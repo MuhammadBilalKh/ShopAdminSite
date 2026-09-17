@@ -7,6 +7,9 @@
                 class="ri-dashboard-line"></i> Dashboard</a>
         <a class="sidebar-link @if (Route::currentRouteName() == 'admin.product_category_lists') active @endif"
             href="{{ route('admin.product_category_lists') }}"><i class="ri-grid-line"></i> Categories</a>
+        <a class="sidebar-link @if(Route::currentRouteName() == "admin.shipping_method") active @endif" href="{{ route('admin.shipping_method') }}">
+            <i class="ri-ship-fill"></i> Shipping Methods
+        </a>
         <a class="sidebar-link @if (Route::currentRouteName() == 'admin.show_product_lists') active @endif"
             href="{{ route('admin.show_product_lists') }}"><i class="ri-store-line"></i> Products</a>
         <a class="sidebar-link @if (Route::currentRouteName() == '') active @endif" href="customers.html"><i
