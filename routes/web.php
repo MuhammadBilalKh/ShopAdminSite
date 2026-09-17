@@ -47,6 +47,10 @@ Route::prefix("site-administrator")->group(function(){
             });
         });
 
+        Route::prefix("orders")->group(function(){
+            Route::get("/list", [AdminController::class, 'manage_orders'])->name("admin.manage_orders");
+        });
+
         Route::prefix("shipping-method")->group(function(){
             Route::get("/", [AdminController::class, 'shipping_method'])->name("admin.shipping_method");
             Route::get("/create", [AdminController::class, 'create_shipping_method'])->name("admin.create_shipping_method");

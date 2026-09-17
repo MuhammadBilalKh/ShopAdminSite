@@ -19,6 +19,16 @@
 
         <div class="col-6 col-xl-3">
             <div class="stat-card">
+                <div class="stat-icon purple"><i class="ri-currency-fill"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statsRevenu">Rs. {{ $totalRevenue }}</div>
+                    <div class="stat-label">Revenue <br />(From {{ now()->startOfMonth()->toDateString() }} to {{ now()->endOfMonth()->toDateString() }})</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="stat-card">
                 <div class="stat-icon purple"><i class="ri-store-line"></i></div>
                 <div class="stat-info">
                     <div class="stat-value" id="statsCategories">{{ $totalProducts }}</div>
@@ -42,7 +52,7 @@
                 <div class="stat-icon green"><i class="ri-file-list-3-line"></i></div>
                 <div class="stat-info">
                     <div class="stat-value" id="statsOrders">{{ $totalOrders }}</div>
-                    <div class="stat-label">Orders</div>
+                    <div class="stat-label">Pending Orders</div>
                 </div>
             </div>
         </div>

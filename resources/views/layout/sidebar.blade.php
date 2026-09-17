@@ -14,7 +14,7 @@
             href="{{ route('admin.show_product_lists') }}"><i class="ri-store-line"></i> Products</a>
         <a class="sidebar-link @if (Route::currentRouteName() == '') active @endif" href="customers.html"><i
                 class="ri-group-line"></i> Customers</a>
-        <a class="sidebar-link @if (Route::currentRouteName() == '') active @endif" href="orders.html"><i
+        <a class="sidebar-link @if (Route::currentRouteName() == 'admin.manage_orders') active @endif" href="{{ route('admin.manage_orders') }}"><i
                 class="ri-file-list-3-line"></i> Orders <span class="sidebar-badge" id="pendingBadge">
                 @if (isset($pending_orders))
                     {{ $pending_orders }}

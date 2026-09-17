@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\City;
 use App\Models\Order;
@@ -15,7 +16,6 @@ use Illuminate\Http\Request;
 use App\Models\ProductHasTag;
 use App\Models\RecentActivity;
 use App\Models\ShippingMethod;
-use App\Models\Warehouse;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -53,9 +53,10 @@ class AdminController extends Controller
         $totalOrders = Order::where("order_status", ORDER_STATUS_PENDING)->count();
         $totalProducts = Product::count();
         $recentOrders = Order::with("getOrderBy")->where(['order_status' => ORDER_STATUS_PENDING])->orderbyDesc("order_id")->limit(10)->get();
+        $totalRevenue = Order::where('order_status', ORDER_STATUS_PROCESSED)->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth(),])->sum('total_amount');
 
         $recentActivties = RecentActivity::orderByDesc("created_at")->limit(10)->get();
-        return view('admin.dashboard', compact('recentOrders','totalCategories', 'totalOrders', 'totalProducts', 'recentActivties'));
+        return view('admin.dashboard', compact('recentOrders','totalCategories', 'totalOrders', 'totalProducts', 'recentActivties', 'totalRevenue'));
     }
 
     public function product_category_lists(Request $request){
@@ -988,6 +989,22 @@ class AdminController extends Controller
                 'shippingMethodData' => $shippingMethodData
             ]);
         }
+    }
+
+    public function manage_orders(Request $request){
+
+        $orders = Order::with("getOrderBy")->with("getOrderLineItems", "getOrderLineItems.getLineItemProduct")->orderByDesc("order_id")->newQuery();
+        
+        if($request->filled("search")){
+            $orders->orWhere('customer_order_id', 'LIKE', '%' . $request->search . '%');
+        }
+
+        if($request->filled("status")){
+            $orders->orWhere("order_status", $request->status);
+        }
+
+        $orders = $orders->paginate(20);
+        return view('admin.orders.manage_orders', compact("orders"));
     }
 
     public function logout(){
