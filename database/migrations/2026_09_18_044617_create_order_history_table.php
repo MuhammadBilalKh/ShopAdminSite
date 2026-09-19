@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders_line_items', function (Blueprint $table) {
-            $table->unsignedBigInteger("order_line_item_id")->autoIncrement();
+        Schema::create('order_history', function (Blueprint $table) {
+            $table->unsignedBigInteger("order_history_id")->autoIncrement();
             $table->unsignedBigInteger("order_id");
-            $table->unsignedBigInteger("product_id");
-            $table->unsignedInteger("quantity");
-            $table->unsignedInteger("price");
+            $table->unsignedTinyInteger("status");
+            $table->unsignedBigInteger("process_by")->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders_line_items');
+        Schema::dropIfExists('order_history');
     }
 };

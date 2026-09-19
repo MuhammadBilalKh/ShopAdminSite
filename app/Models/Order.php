@@ -34,4 +34,8 @@ class Order extends Model
     public function getShippingMethod(){
         return $this->belongsTo(ShippingMethod::class, "shipping_method_id", "shipping_method_id");
     }
+
+    public function getOrderTimeLine(){
+        return $this->hasMany(OrderHistory::class, "order_id", "order_id");
+    }
 }

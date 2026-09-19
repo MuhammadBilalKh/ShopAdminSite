@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\WishList;
 use App\Models\Category;
 use App\Models\Customer;
+use App\Models\OrderHistory;
 use Illuminate\Http\Request;
 use App\Models\OrderLineItem;
 use App\Models\ProductReview;
@@ -302,10 +303,18 @@ class ShopController extends Controller
                     'order_id' => $nOrder->order_id,
                     'product_id' => $cartItem->product_id,
                     'quantity' => $cartItem->quantity,
+                    'price' => $cartItem->price
                 ]);
             }
 
             Cart::where('customer_id', $customerId)->delete();
+
+            OrderHistory::create([
+                'order_id' => $nOrder->order_id,
+                'customer_id' => Auth::guard('customer')->user()->customer_id,
+                'status' => ORDER_STATUS_PENDING,
+                'process_by' => SYSTEM_ID
+            ]);
 
             DB::commit();
 

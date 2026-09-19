@@ -3,6 +3,8 @@
 defined("STATUS_ACTIVE") || define("STATUS_ACTIVE", 1);
 defined("STATUS_INACTIVE") || define("STATUS_INACTIVE", 0);
 
+defined("SYSTEM_ID") || define("SYSTEM_ID", 0);
+
 defined("USER_ROLE_ADMIN") || define("USER_ROLE_ADMIN", "admin");
 defined("USER_ROLE_SUB_ADMIN") || define("USER_ROLE_SUB_ADMIN", "sub-admin");
 

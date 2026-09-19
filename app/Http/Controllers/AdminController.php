@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\MajorArea;
 use App\Models\MinorArea;
+use App\Models\OrderHistory;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\ProductHasTag;
@@ -1005,6 +1006,63 @@ class AdminController extends Controller
 
         $orders = $orders->paginate(20);
         return view('admin.orders.manage_orders', compact("orders"));
+    }
+
+    public function order_detail($orderID){
+        $orderDetail = Order::with("getOrderBy", "getShippingMethod", "getOrderTimeLine", "getOrderTimeLine.getProcessBy")->where("customer_order_id", $orderID)->firstOrFail();
+        
+        $content =  view('admin.orders.view_order_detals', [
+            'orderData' => $orderDetail
+        ])->render();
+        $orderID = $orderDetail->customer_order_id;
+        
+        return response()->json([
+            'view' => $content,
+            'orderID' => $orderID,
+            'orderStatus' => $orderDetail->order_status
+        ]);
+    }
+
+    public function update_order_status(Request $request){
+        $orderData = Order::where("customer_order_id", $request->order_id)->first();
+
+        if(empty($orderData)){
+            return response()->json([
+                'status' => REQUEST_PROCESSED_SUCCESSFULLY,
+                'message' => "Invalid Order ID"
+            ]);
+        }
+
+        $validOrderStatus = [
+            ORDER_STATUS_CANCELLED,
+            ORDER_STATUS_PENDING,
+            ORDER_STATUS_PROCESSED,
+            ORDER_STATUS_PROCESSING,
+            ORDER_STATUS_SHIPPER
+        ];
+
+        if(!in_array($request->order_status, $validOrderStatus)){
+            return response()->json([
+                'status' => REQUEST_PROCESSED_SUCCESSFULLY,
+                'message' => "Invalid Order Status"
+            ]);
+        }
+
+        $orderData->update([
+            'order_status' => $request->order_status,
+            'order_process_by' => Auth::user()->user_id
+        ]);
+
+        OrderHistory::create([
+            'order_id' => $orderData->order_id,
+            'status' => $request->order_status,
+            'process_by' => Auth::user()->user_id
+        ]);
+
+        return response()->json([
+            'status' => REQUEST_PROCESSED_SUCCESSFULLY,
+            'message' => "Order Status Updated Successfully"
+        ]);
     }
 
     public function logout(){

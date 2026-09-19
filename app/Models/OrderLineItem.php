@@ -10,7 +10,8 @@ class OrderLineItem extends Model
     protected $fillable = [
         "order_id",
         "product_id",
-        "quantity"
+        "quantity",
+        "price"
     ];
 
     protected $primaryKey = "orders_line_items";

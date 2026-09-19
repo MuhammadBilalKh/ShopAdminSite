@@ -121,10 +121,11 @@
                             <td width="200" class="small text-muted">{{ $value->created_at->toDateTimeString() }}</td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <button class="btn-action view view-order-btn"
-                                        data-id="{{ $value->customer_order_id }}" title="View"><i
-                                            class="ri-eye-line"></i></button>
-                                    <button class="btn-action delete delete-order-btn"
+                                    <button data-bs-toggle="modal" data-bs-target="#orderModal"
+                                        class="btn-action view view-order-btn" data-id="{{ $value->customer_order_id }}"
+                                        title="View"><i class="ri-eye-line"></i></button>
+                                    <button data-bs-toggle="modal" data-bs-target="#orderModal"
+                                        class="btn-action delete delete-order-btn"
                                         data-id="{{ $value->customer_order_id }}" title="Delete"><i
                                             class="ri-delete-bin-line"></i></button>
                                 </div>
@@ -132,16 +133,44 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8">No Pending Orders Found</td>
+                                <td colspan="8" class="text-center">No Pending Orders Found</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
-                {{ $orders->links() }}
             </div>
             <div class="p-3 d-flex align-items-center justify-content-between flex-wrap gap-2 border-top">
-                <div class="text-muted small" id="orderCountInfo">Showing 1–5 of 5 orders</div>
-                <div id="ordersPagination"></div>
+                {{ $orders->links() }}
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-modal="true" role="dialog" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="ri-file-list-3-line me-2"></i>Order <span
+                            id="modalOrderId">ORD-1789493808219</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="orderModalBody">
+
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex align-items-center gap-2 flex-wrap w-100">
+                        <label class="fw-700 small me-1">Update Status:</label>
+                        <select class="form-select ordStatus form-select-sm" id="statusUpdateSelect" style="width:auto">
+                            <option value="{{ ORDER_STATUS_PENDING }}">Pending</option>
+                            <option value="{{ ORDER_STATUS_PROCESSING }}">Processing</option>
+                            <option value="{{ ORDER_STATUS_PROCESSED }}">Delivered</option>
+                            <option value="{{ ORDER_STATUS_CANCELLED }}">Cancelled</option>
+                            <option value="{{ ORDER_STATUS_SHIPPER }}">Shipped</option>
+                        </select>
+                        <button class="btn-primary-custom ms-auto" id="updateStatusBtn" style="padding:.45rem 1.1rem">
+                            <i class="ri-save-line me-1"></i>Update Status
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -151,8 +180,59 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                }
+            });
+
             $(".btnSearch").on("click", function() {
                 ApplySearch();
+            });
+
+            $("#updateStatusBtn").click(function(){
+                $.ajax({
+                    url:"{{ route('admin.update_order_status') }}",
+                    type:"POST",
+                    data:{
+                        order_id: $(this).data("product-id"),
+                        order_status: $(".ordStatus").val()
+                    },
+                    success:function(resp){
+                        if(resp.status == 1){
+                            alert(resp.message);
+                        }
+                    },
+                    error: function(){
+                        alert("An Internal Error Occured While Processing The Request. Please Try Again Later.")
+                    }
+                });
+            });
+
+            $(".view-order-btn").click(function(e) {
+                let baseRoute = "{{ route('admin.order_detail', ['orderID' => 'PLACEHOLDER_ID']) }}";
+                let viewOrderRoute = baseRoute.replace("PLACEHOLDER_ID", $(this).data("id"));
+
+                $.ajax({
+                    url: viewOrderRoute,
+                    type: "GET",
+                    beforeSend: function(resp) {
+                        $("#modalOrderId").html("");
+                        $(".modal-body").html("Fetching Details.. Please Wait.")
+                    },
+                    success: function(resp) {
+                        $("#modalOrderId").html(resp.orderID);
+                        $(".modal-body").html(resp.view);
+                        $("#statusUpdateSelect").val(String(resp.orderStatus));
+                        $("#updateStatusBtn").attr("data-product-id", resp.orderID);
+                    },
+                    error: function() {
+                        $(".modal-body").html(
+                            "An Error Occured While Processing The Request. Please Try Again Later."
+                        );
+                    }
+                });
             });
 
             function ApplySearch() {

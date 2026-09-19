@@ -49,6 +49,8 @@ Route::prefix("site-administrator")->group(function(){
 
         Route::prefix("orders")->group(function(){
             Route::get("/list", [AdminController::class, 'manage_orders'])->name("admin.manage_orders");
+            Route::get("/detail/{orderID}", [AdminController::class, 'order_detail'])->name("admin.order_detail");
+            Route::post("/update-status", [AdminController::class, 'update_order_status'])->name("admin.update_order_status");
         });
 
         Route::prefix("shipping-method")->group(function(){
