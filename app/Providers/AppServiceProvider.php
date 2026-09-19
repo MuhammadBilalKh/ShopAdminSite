@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
     {
         View::share(
              'pending_orders',
-             Order::where('order_status', ORDER_STATUS_PENDING)->count()
+             Order::where('order_status', 0)->count()
          );
 
          View::composer('layout.shop.footer', function($view){

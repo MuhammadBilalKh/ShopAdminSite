@@ -875,10 +875,11 @@ img { max-width: 100%; height: auto; }
   cursor: pointer;
   transition: var(--transition);
 }
-.btn-action.edit   { background: var(--primary-light); color: var(--primary); }
-.btn-action.delete { background: #ffe4ec; color: var(--secondary); }
-.btn-action.view   { background: #d1fae5; color: #059669; }
-.btn-action:hover  { transform: scale(1.12); }
+.btn-action.edit    { background: var(--primary-light); color: var(--primary); }
+.btn-action.delete  { background: #ffe4ec; color: var(--secondary); }
+.btn-action.view    { background: #d1fae5; color: #059669; }
+.btn-action.invoice { background: #17a2b8; color: white; }
+.btn-action:hover   { transform: scale(1.12); }
 
 /* Admin Chart cards */
 .chart-card {

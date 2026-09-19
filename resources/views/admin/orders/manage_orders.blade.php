@@ -128,6 +128,8 @@
                                         class="btn-action delete delete-order-btn"
                                         data-id="{{ $value->customer_order_id }}" title="Delete"><i
                                             class="ri-delete-bin-line"></i></button>
+                                    <a href="{{ route('admin.save_invoice', ['order_id' => $value->customer_order_id]) }}" title="Invoice" class="btn-action view invoice invoice-order-btn"><i
+                                            class="ri-bill-fill"></i></a>
                                 </div>
                             </td>
                             </tr>
