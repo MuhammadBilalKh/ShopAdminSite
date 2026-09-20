@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Tag;
-use Dompdf\Options;
 use App\Models\City;
 use App\Models\Order;
 use App\Models\Product;
@@ -18,12 +17,12 @@ use Illuminate\Http\Request;
 use App\Models\ProductHasTag;
 use App\Models\RecentActivity;
 use App\Models\ShippingMethod;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use BladePDF\Laravel\Facades\BladePDF;
 use Illuminate\Contracts\Encryption\DecryptException;
 
 class AdminController extends Controller
@@ -1069,17 +1068,45 @@ class AdminController extends Controller
 
     public function save_invoice(Request $request)
     {
-        dd(121);
         $orderDetail = Order::with(
             "getOrderBy",
             "getShippingMethod",
             "getOrderTimeLine",
             "getOrderTimeLine.getProcessBy"
-        )->where("customer_order_id", $request->order_id)->firstOrFail();
-            
-        $content = view('admin.orders.order_invoice', compact('orderDetail'))->render();
-        $pdf = Pdf::loadHTML($content)->setPaper("A4", "portrait");
-        return $pdf->download("Invoice-".now().".pdf");
+        )
+        ->where("customer_order_id", $request->order_id)
+        ->firstOrFail();
+
+        $css = file_get_contents(public_path('css/invoice.css'));
+
+        $html = view('admin.orders.order_invoice', [
+            'orderDetail' => $orderDetail,
+            'css' => $css,
+        ])->render();
+
+        $mpdf = new \Mpdf\Mpdf([
+            'format'        => 'A4',
+            'tempDir'       => storage_path('app/mpdf'),
+            'margin_top'    => 10,
+            'margin_bottom' => 10,
+            'margin_left'   => 10,
+            'margin_right'  => 10,
+        ]);
+
+        // Write CSS FIRST, then the body
+        $mpdf->WriteHTML($css, \Mpdf\HTMLParserMode::HEADER_CSS);
+        $mpdf->WriteHTML($html, \Mpdf\HTMLParserMode::HTML_BODY);
+
+        $pdfContent = $mpdf->Output('invoice.pdf', 'S');
+        $filename   = 'invoice-' . $orderDetail->customer_order_id . '.pdf';
+
+        return response($pdfContent, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length'      => strlen($pdfContent),
+            'Cache-Control'       => 'private, max-age=0, must-revalidate',
+            'Pragma'              => 'public',
+        ]);
     }
 
     public function logout(){
