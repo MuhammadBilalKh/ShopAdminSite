@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use Dompdf\Dompdf;
 use Carbon\Carbon;
 use App\Models\Tag;
 use Dompdf\Options;
@@ -13,12 +12,13 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\MajorArea;
 use App\Models\MinorArea;
-use App\Models\OrderHistory;
 use Illuminate\Support\Str;
+use App\Models\OrderHistory;
 use Illuminate\Http\Request;
 use App\Models\ProductHasTag;
 use App\Models\RecentActivity;
 use App\Models\ShippingMethod;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -1069,30 +1069,17 @@ class AdminController extends Controller
 
     public function save_invoice(Request $request)
     {
+        dd(121);
         $orderDetail = Order::with(
             "getOrderBy",
             "getShippingMethod",
             "getOrderTimeLine",
             "getOrderTimeLine.getProcessBy"
-        )
-        ->where("customer_order_id", $request->order_id)
-        ->firstOrFail();
-
-        $content = view("admin.orders.order_invoice", compact("orderDetail"))->render();
-
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true);
-
-        $pdf = new Dompdf($options);
-
-        $pdf->loadHtml($content);
-
-        $pdf->setPaper('A4', 'portrait');
-
-        $pdf->render();
-
-        return response($pdf->output(), 200)->header('Content-Type', 'application/pdf')->header(    'Content-Disposition',    'attachment; filename="invoice-' . $orderDetail->customer_order_id . '.pdf"');
+        )->where("customer_order_id", $request->order_id)->firstOrFail();
+            
+        $content = view('admin.orders.order_invoice', compact('orderDetail'))->render();
+        $pdf = Pdf::loadHTML($content)->setPaper("A4", "portrait");
+        return $pdf->download("Invoice-".now().".pdf");
     }
 
     public function logout(){
